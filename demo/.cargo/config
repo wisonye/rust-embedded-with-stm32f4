@@ -1,0 +1,41 @@
+[target.thumbv7em-none-eabi]
+# Settings below will make `cargo run` execute programs on QEMU
+# Normal version
+runner = "qemu-system-gnuarmeclipse -cpu cortex-m4 -mcu STM32F407VG -machine STM32F4-Discovery -nographic -semihosting-config enable=on,target=native -kernel"
+# Normal version (with dev board UI)
+# runner = "qemu-system-gnuarmeclipse -cpu cortex-m4 -mcu STM32F407VG -machine STM32F4-Discovery -semihosting-config enable=on,target=native -kernel"
+
+# Debug version, QEMU wll wait for the GDB connection from TCP port 3333 and halt the machine.
+# runner = "qemu-system-gnuarmeclipse -gdb tcp::3333 -S -cpu cortex-m4 -mcu STM32F407VG -machine STM32F4-Discovery -nographic -semihosting-config enable=on,target=native -kernel"
+# Debug version (with dev board UI), QEMU wll wait for the GDB connection from TCP port 3333 and halt the machine.
+# runner = "qemu-system-gnuarmeclipse -gdb tcp::3333 -S -cpu cortex-m4 -mcu STM32F407VG -machine STM32F4-Discovery -semihosting-config enable=on,target=native -kernel"
+
+[target.'cfg(all(target_arch = "arm", target_os = "none"))']
+# uncomment ONE of these three option to make `cargo run` start a GDB session
+# which option to pick depends on your system
+# runner = "arm-none-eabi-gdb -q -x openocd.gdb"
+# runner = "gdb-multiarch -q -x openocd.gdb"
+# runner = "gdb -q -x openocd.gdb"
+
+rustflags = [
+  # LLD (shipped with the Rust toolchain) is used as the default linker
+  "-C", "link-arg=-Tlink.x",
+
+  # if you run into problems with LLD switch to the GNU linker by commenting out
+  # this line
+  # "-C", "linker=arm-none-eabi-ld",
+
+  # if you need to link to pre-compiled C libraries provided by a C toolchain
+  # use GCC as the linker by commenting out both lines above and then
+  # uncommenting the three lines below
+  # "-C", "linker=arm-none-eabi-gcc",
+  # "-C", "link-arg=-Wl,-Tlink.x",
+  # "-C", "link-arg=-nostartfiles",
+]
+
+[build]
+# As we use STM32F4DISCOVERY, then pick the `Cortex-M4F`
+# target = "thumbv7em-none-eabihf" # Cortex-M4F and Cortex-M7F (with FPU)
+
+# But if running in QEMU, then we can't use the FPU version, as QEMU doesn't support!!!
+target = "thumbv7em-none-eabi"   # Cortex-M4 and Cortex-M7 (no FPU)
