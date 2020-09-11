@@ -4,9 +4,22 @@ In this manual, we will cover all the knowledge we need to know for using `Rust`
 
 And we pick the `ARM-based MCU STM32F4` series chips as our target to run all the demos.
 
-## Important concepts
+[**1. Important concepts**](#important-concepts)
+- [_1.1 What is `MCU` and `Soc` ? What makes it different than `SBC`?_](#what-is-mcu)
+- [_1.2 What is `STM32`?_](#what-is-stm32)
+- [_1.3 The hardware we will use in the demo_](#the-hardware-we-will-use-in-the-demo)
 
-#### 1. What is `MCU` and `Soc` ? What makes it different than `SBC`?
+[**2. Setup Environment**](#setup-environment)
+- [_2.1 Install tooling_](#install-tooling)
+- [_2.2 Create `demo` project from template_](#create-demo-project-from-template)
+- [_2.3 Run hello example in `QEMU` and set break point in `ARM GDB`_](#run-hello-example-in-qemu)
+- [_2.3.1 Run hello example in hardware_](#run-hello-example-in-hardware)
+- [_2.3.2 Debugging in `vim` with the `ARM GDB`_](#debugging-in-vim-gdb)
+<hr>
+
+## <a name="important-concepts">1. Important concepts</a>
+
+#### <a name="what-is-mcu">1.1 What is `MCU` and `Soc` ? What makes it different than `SBC`?</a>
 
 - `MCU` stands for `Microcontroller Unit`.
 - `Soc` stands for `System-on-chip`.
@@ -28,7 +41,7 @@ It's basically a very small computer on an `IC` (integrated circuit) or microchi
 `OS` on it).
 - `MCU` doesn't have `OS` at all, your program will be the **only** one program running there with full control and real-time responsiveness.
 
-#### 2. What is `STM32`?
+#### <a name="what-is-stm32">1.2 What is `STM32`?</a>
 
 `STM32` is a family of **32-bit** `MCU` by **STMicroelectronics**. The `STM32` chips are grouped into related series that are based around the same **32-bit** ARM processor core, such as:
 
@@ -46,7 +59,7 @@ Internally, each `MCU` consists of the processor core, static RAM, flash memory,
 The company behind the `Arm` trademark (`Arm Holdings`) doesn't actually manufacture chips for purchase. Instead, their primary business model is to just design parts of chips. They will then license those designs to manufacturers, who will in turn implement the designs (perhaps with some of their own tweaks) in the form of physical hardware that can then be sold.
 
 
-### 3. The hardware we will use in the demo
+### <a name="the-hardware-we-will-use-in-the-demo">1.3 The hardware we will use in the demo</a>
 
 **STM32F407G-DISC1** (replaces **STM32F4DISCOVERY**) dev board which with the `STM32F407VG` high performance `MCU`.
 
@@ -57,12 +70,12 @@ High-performance foundation line, ARM **Cortex-M4** core with **DSP** and **FPU*
 More hardware details at [here](https://www.st.com/content/st_com/en/products/microcontrollers-microprocessors/stm32-32-bit-arm-cortex-mcus/stm32-high-performance-mcus/stm32f4-series/stm32f407-417/stm32f407vg.html), and the datasheet at [here](https://www.st.com/resource/en/datasheet/stm32f407vg.pdf).
 
 
-## Setup environment
+## <a name="setup-environment">2. Setup environment</a>
 
 Before we can write rust and test it on emulator or the real hardware, we need to install 
 some tools below:
 
-#### 1. Install tooling
+#### <a name="install-tooling">2.1 Install tooling</a>
 - `rust` and related binaries
     
     ```bash
@@ -141,7 +154,7 @@ some tools below:
 
 </br>
 
-#### 2. Create `demo` project from template
+#### <a name="create-demo-project-from-template">2.2 Create `demo` project from template</a>
 
 ```bash
 cargo generate --git https://github.com/rust-embedded/cortex-m-quickstart
@@ -150,7 +163,7 @@ cargo generate --git https://github.com/rust-embedded/cortex-m-quickstart
 
 </br>
 
-#### 3. Run hello example in `QEMU` and set break point in `ARM GDB`
+#### <a name="run-hello-example-in-qemu">2.3 Run hello example in `QEMU` and set break point in `ARM GDB`</a>
 
 - Add the below settings to `.cargo/config` 
 
@@ -200,7 +213,7 @@ cargo generate --git https://github.com/rust-embedded/cortex-m-quickstart
 
 </br>
     
-#### 3.1 Run hello example in hardware
+#### <a name="run-hello-example-in-hardware">2.3.1 Run hello example in hardware<a>
 
 - First, make sure you go through this [step](https://rust-embedded.github.io/book/intro/install/verify.html) to 
 make sure all hardware connections already work.
@@ -215,7 +228,7 @@ make sure all hardware connections already work.
 
 </br>
 
-#### 3.2 Debugging in `vim` with the `ARM GDB`
+#### <a name="debugging-in-vim-gdb">2.3.2 Debugging in `vim` with the `ARM GDB`</a>
 
 - Todo: [Tutorial Link Here](https://www.dannyadam.com/blog/2019/05/debugging-in-vim/)
 
