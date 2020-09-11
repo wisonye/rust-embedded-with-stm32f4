@@ -15,6 +15,9 @@ And we pick the `ARM-based MCU STM32F4` series chips as our target to run all th
 - [_2.3 Run hello example in `QEMU` and set break point in `ARM GDB`_](#run-hello-example-in-qemu)
 - [_2.3.1 Run hello example in hardware_](#run-hello-example-in-hardware)
 - [_2.3.2 Debugging in `vim` with the `ARM GDB`_](#debugging-in-vim-gdb)
+
+[**3. How to choose which crate (rust's library) to start**](#how-to-choose-which-crate-to-start)
+- [_3.1 The basic example_](#the-basic-example)
 <hr>
 
 ## <a name="important-concepts">1. Important concepts</a>
@@ -80,10 +83,10 @@ some tools below:
     
     ```bash
     # Install latest rustup
-    - `curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh`
+    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 
     # `cargo-generate` used to generate the rust embedded project from template
-    - `cargo install cargo-generate`
+    cargo install cargo-generate
 
     # `cargo-binutils` is a collection of cargo subcommand LLVM tools. Like:
     # `rust-objdump`,
@@ -94,9 +97,12 @@ some tools below:
     # `rust-nm`,
     # `rust-size`,
     # etc.
-    - `cargo install cargo-binutils`
+    cargo install cargo-binutils
 
-    - `rustup component add llvm-tools-preview`
+    rustup component add llvm-tools-preview
+
+    # We need this for hot-load
+    cargo install cargo-watch
 
     # Add cross-compilation target
     rustup target add thumbv7em-none-eabi
@@ -235,5 +241,132 @@ make sure all hardware connections already work.
 
 </br>
 
-## Dive into a real GPIO demo
+## <a name="how-to-choose-which-crate-to-start">3. How to choose which crate (rust's library) to start</a>
 
+![How to choose which crate to start](book/images/how-to-choice-which-crate.png)
+
+In `Rust` world, you got several options to start your project, it totally depends on your situation, below are the tips:
+
+- **Micro-architecture Crate**
+
+   This sort of crate handles any useful routines common to the processor core your microcontroller is using, as well as any peripherals that are common to all micro-controllers that use that particular type of processor core. For example the `cortex-m` crate gives you functions to enable and disable interrupts, which are the same for all `Cortex-M` based micro-controllers. It also gives you access to the 'SysTick' peripheral included with all `Cortex-M` based micro-controllers.
+
+- **Peripheral Access Crate (PAC)**
+
+   This sort of crate is a thin wrapper over the various memory-wrapper registers defined for your particular part-number of micro-controller you are using. For example, `tm4c123x` for the **Texas Instruments Tiva-C TM4C123 series**, or `stm32f30x` for the **ST-Micro STM32F30x series**. Here, you'll be interacting with the registers directly, following each peripheral's operating instructions given in your micro-controller's Technical Reference Manual.
+
+- **HAL Crate**
+
+    These crates offer a more user-friendly API for your particular processor, often by implementing some common traits defined in embedded-hal. For example, this crate might offer a Serial struct, with a constructor that takes an appropriate set of GPIO pins and a baud rate, and offers some sort of write_byte function for sending data. See the chapter on Portability for more information on embedded-hal.
+
+- **Board Crate**
+
+    These crates go one step further than a HAL Crate by pre-configuring various peripherals and GPIO pins to suit the specific developer kit or board you are using, such as `stm32f3-discovery` for the **STM32F3DISCOVERY** board.
+
+
+Let's try that one-by-one:
+
+### <a name="the-basic-example">3.1 The basic example</a>
+
+- Make sure your `Cargo.toml` has the below settings:
+
+    ```rust
+    [dependencies]
+    cortex-m = "0.6.0"
+    cortex-m-rt = "0.6.10"
+
+    cortex-m-semihosting = "0.3.3"
+
+    # For debugging purpose, enable `exit` feature
+    panic-semihosting = { version = "0.5.3", features = ['exit'] }
+
+    panic-halt = "0.2.0"
+    ```
+
+- Create `demo/examples/basic.rs` with the following code:
+
+    ```rust
+    #![allow(warnings)]
+    
+    // This attribute means the program won't use `std` crate` which assumes
+    // an underlying OS. The program will use `core` crate, a subset of `std`
+    // that can run on bare metal systems.
+    #![no_std]
+    
+    // This attribute means the program won't use the standard `main` interface.
+    #![no_main]
+    
+    use cortex_m::peripheral::{Peripherals};
+    use cortex_m_rt::entry;
+    
+    // `cortex_m_semihosting` gives us the ability to print the debug info
+    // into the host console. But keep in mind that, each write operation
+    // is super slow which takes several milliseconds depends on the
+    // hardware!!! Better to use the config to enable the call or not.
+    use cortex_m_semihosting::{dbg, hprintln};
+    
+    // `panic_semihosting` will call `debug::EXIT_FAILURE` after logging the
+    // panic message.
+    use panic_semihosting as _;
+    
+    // Set to `false` when u don't need that anymore
+    const ENABLE_DEBUG: bool = true;
+    
+    // We will use the `entry` attribute from the `cortex_m_rt` crate to define
+    // the entry point. The entry point function must have signature `fn() -> !;`
+    // which means can't return, as the program never terminates.
+    #[entry]
+    fn main() -> ! {
+        // `hprintln` returns `Result<(),()>`
+        if ENABLE_DEBUG {
+            let _ = hprintln!("Basic STM32F4 demo is running >>>>>");
+        }
+    
+        // Get the singleton `Peripherals` instance. This method can only
+        // successfully called **once()**, that's why return an `Option`.
+        let peripherals = Peripherals::take().unwrap();
+    
+        // You can't do this, as `cortex_m::Peripherals` cannot be formatted
+        // using `{:?}` because it doesn't implement `core::fmt::Debug`.
+        // dbg!(peripherals);
+    
+        let x = 10;
+        if ENABLE_DEBUG {
+            hprintln!("x is {}", x);
+            dbg!(x);
+        }
+    
+        // This will panic!!!
+        assert_eq!(x, 8);
+    
+        loop {
+            // Your program loop code here
+        }
+    }
+    ```
+
+
+
+- How to run it with hot-load behavior
+
+    ```rust
+    # cd demo
+    cargo watch -c --exec 'run --example basic'
+    ```
+    Every time you save `demo/examples/basic.rs`, `cargo run --example basic` will run again.
+
+    ```rust
+    (qemu) System timer demo is running >>>>>
+    x is 10
+    [examples/basic.rs:35] x = 10
+    panicked at 'assertion failed: `(left == right)`
+    left: `10`,
+    right: `8`', examples/basic.rs:36:5
+    [Finished running. Exit status: 1]
+    ```
+</br>
+
+
+### <a name="the-basic-example">3.2 The basic example</a>
+
+- Make sure your `Cargo.toml` has the below settings:
