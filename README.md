@@ -389,9 +389,9 @@ Let's try that one-by-one:
 
 ### <a name="the-gpio-led-example">3.2 The GPIO LED blinking example</a>
 
-In this example, I use `HAL` crate rather than using `PAC` which gives us a better high-level abstraction API for coding.
-The `HAL` we use is [`stm32f4xx-hal`](https://crates.io/crates/stm32f4xx-hal), also we enable the `stm32f407` feature, as
-that's the `MCU` we used in this demo.
+In this example, we will use `HAL` crate rather than using `PAC` which provides a better high-level abstraction API for coding.
+The `HAL` crate is [`stm32f4xx-hal`](https://crates.io/crates/stm32f4xx-hal), also make sure enable the `stm32f407` feature, as
+that's the `MCU` we use.
 
 - Make sure your `Cargo.toml` has the settings below:
 
