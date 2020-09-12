@@ -1,14 +1,12 @@
 #![allow(warnings)]
-
-// This attribute means the program won't use `std` crate` which assumes
+// This attribute means the program won't use `std` crate which assumes
 // an underlying OS. The program will use `core` crate, a subset of `std`
 // that can run on bare metal systems.
 #![no_std]
-
 // This attribute means the program won't use the standard `main` interface.
 #![no_main]
 
-use cortex_m::peripheral::{Peripherals};
+use cortex_m::peripheral::Peripherals;
 use cortex_m_rt::entry;
 
 // `cortex_m_semihosting` gives us the ability to print the debug info

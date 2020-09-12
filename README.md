@@ -18,6 +18,8 @@ And we pick the `ARM-based MCU STM32F4` series chips as our target to run all th
 
 [**3. How to choose which crate (rust's library) to start**](#how-to-choose-which-crate-to-start)
 - [_3.1 The basic example_](#the-basic-example)
+- [_3.2 The GPIO LED blinking example_](#the-gpio-led-example)
+
 <hr>
 
 ## <a name="important-concepts">1. Important concepts</a>
@@ -156,6 +158,18 @@ some tools below:
     brew install openocd
     ```
 
+    After that, you will find the `OpenOCD` interface configuration and target configuration at here:
+
+    _`/usr/local/Cellar/open-ocd/{VERSION_NUMBER}/share/openocd/scripts/interface/stlink-v2-1.cfg`_
+    _`/usr/local/Cellar/open-ocd/{VERSION_NUMBER}/share/openocd/scripts/target/stm32f4x.cfg`_
+
+- **ST-LINK** to use burn your program into `STM32F4` hardware
+
+    ```bash
+    brew install stlink
+    ```
+
+
 [More detail here](https://rust-embedded.github.io/book/intro/tooling.html)
 
 </br>
@@ -230,7 +244,7 @@ make sure all hardware connections already work.
     cargo run --target thumbv7em-none-eabihf --example hello
     ```
 
-- For debugging, plz follow steps [here](https://rust-embedded.github.io/book/start/hardware.html)
+- For debugging, plz follow steps [here](https://rust-embedded.github.io/discovery/05-led-roulette/flash-it.html)
 
 </br>
 
@@ -253,50 +267,56 @@ In `Rust` world, you got several options to start your project, it totally depen
 
 - **Peripheral Access Crate (PAC)**
 
-   This sort of crate is a thin wrapper over the various memory-wrapper registers defined for your particular part-number of micro-controller you are using. For example, `tm4c123x` for the **Texas Instruments Tiva-C TM4C123 series**, or `stm32f30x` for the **ST-Micro STM32F30x series**. Here, you'll be interacting with the registers directly, following each peripheral's operating instructions given in your micro-controller's Technical Reference Manual.
+   This sort of crate is a thin wrapper over the various memory-wrapper registers defined for your particular part-number of micro-controller you are using. For example, [`stm32f4`](https://crates.io/crates/stm32f4) for the **ST-Micro STM32F40x series**. Here, you'll be interacting with the registers directly, following each peripheral's operating instructions given in your micro-controller's Technical Reference Manual.
 
-- **HAL Crate**
+- **HAL (Hardware Abstraction Layer) Crate**
 
-    These crates offer a more user-friendly API for your particular processor, often by implementing some common traits defined in embedded-hal. For example, this crate might offer a Serial struct, with a constructor that takes an appropriate set of GPIO pins and a baud rate, and offers some sort of write_byte function for sending data. See the chapter on Portability for more information on embedded-hal.
+    These crates offer a more user-friendly API for your particular processor, often by implementing some common traits defined in [`embedded-hal`](https://crates.io/crates/embedded-hal). For example, [`stm32f4xx-hal`](https://crates.io/crates/stm32f4xx-hal) crate might offer a Serial struct, with a constructor that takes an appropriate set of GPIO pins and a baud rate, and offers some sort of write_byte function for sending data. See the chapter on Portability for more information on embedded-hal.
 
 - **Board Crate**
 
-    These crates go one step further than a HAL Crate by pre-configuring various peripherals and GPIO pins to suit the specific developer kit or board you are using, such as `stm32f3-discovery` for the **STM32F3DISCOVERY** board.
+    These crates go one step further than a HAL Crate by pre-configuring various peripherals and GPIO pins to suit the specific developer kit or board you are using, such as [`stm32f3-discovery`](https://crates.io/crates/stm32f3-discovery) for the **STM32F3DISCOVERY** board.
 
 
 Let's try that one-by-one:
 
 ### <a name="the-basic-example">3.1 The basic example</a>
 
-- Make sure your `Cargo.toml` has the below settings:
+- Make sure your `Cargo.toml` has the settings below:
 
     ```rust
     [dependencies]
     cortex-m = "0.6.0"
     cortex-m-rt = "0.6.10"
-
     cortex-m-semihosting = "0.3.3"
-
+    # panic-halt = "0.2.0"
+    
     # For debugging purpose, enable `exit` feature
     panic-semihosting = { version = "0.5.3", features = ['exit'] }
-
-    panic-halt = "0.2.0"
     ```
 
-- Create `demo/examples/basic.rs` with the following code:
+- Make sure your `.cargo/config` has the settings below:
+
+    ```rust
+    [target.thumbv7em-none-eabi]
+    # Settings below will make `cargo run` execute programs on QEMU
+    # Normal version
+    runner = "qemu-system-gnuarmeclipse -cpu cortex-m4 -mcu STM32F407VG -machine STM32F4-Discovery -nographic -semihosting-config enable=on,target=native -kernel"
+    ```
+
+
+- Create [`demo/examples/basic.rs`](demo/examples/basic.rs) with the following code:
 
     ```rust
     #![allow(warnings)]
-    
-    // This attribute means the program won't use `std` crate` which assumes
+    // This attribute means the program won't use `std` crate which assumes
     // an underlying OS. The program will use `core` crate, a subset of `std`
     // that can run on bare metal systems.
     #![no_std]
-    
     // This attribute means the program won't use the standard `main` interface.
     #![no_main]
     
-    use cortex_m::peripheral::{Peripherals};
+    use cortex_m::peripheral::Peripherals;
     use cortex_m_rt::entry;
     
     // `cortex_m_semihosting` gives us the ability to print the debug info
@@ -367,6 +387,148 @@ Let's try that one-by-one:
 </br>
 
 
-### <a name="the-basic-example">3.2 The basic example</a>
+### <a name="the-gpio-led-example">3.2 The GPIO LED blinking example</a>
 
-- Make sure your `Cargo.toml` has the below settings:
+In this example, I use `HAL` crate rather than using `PAC` which gives us a better high-level abstraction API for coding.
+The `HAL` we use is [`stm32f4xx-hal`](https://crates.io/crates/stm32f4xx-hal), also we enable the `stm32f407` feature, as
+that's the `MCU` we used in this demo.
+
+- Make sure your `Cargo.toml` has the settings below:
+
+    ```rust
+    [dependencies]
+    cortex-m = "0.6.0"
+    cortex-m-rt = "0.6.10"
+    cortex-m-semihosting = "0.3.3"
+    # panic-halt = "0.2.0"
+    
+    # For debugging purpose, enable `exit` feature
+    panic-semihosting = { version = "0.5.3", features = ['exit'] }
+    
+    # PAC (Peripheral Access Crate)
+    # stm32f4 = { version = "0.11.0", features = ["stm32f407", "rt"] }
+    
+    # HAL (Hardware Abstraction Layer)
+    stm32f4xx-hal = { version = "0.8.3", features = ['stm32f407'] }
+    ```
+
+- Make sure your `.cargo/config` has the settings below:
+
+    We need to use the `runner` config without `-nographic`, then `QEMU` will open a dev board GUI, so we can see the blinking LED.
+
+    ```rust
+    [target.thumbv7em-none-eabi]
+    # Settings below will make `cargo run` execute programs on QEMU
+    # Normal version (with dev board UI)
+    runner = "qemu-system-gnuarmeclipse -cpu cortex-m4 -mcu STM32F407VG -machine STM32F4-Discovery -semihosting-config enable=on,target=native -kernel"
+    ```
+
+
+- Create [`demo/examples/gpio_led.rs`](demo/examples/gpio_led.rs) with the following code:
+
+    ```rust
+    #![no_std]
+    #![no_main]
+    
+    use cortex_m_rt::entry;
+    use cortex_m_semihosting::hprintln;
+    use panic_semihosting as _;
+    
+    use crate::hal::{prelude::*, stm32};
+    
+    // This is very important!!!
+    use stm32f4xx_hal as hal;
+    
+    // Import from `stm32f4xx_hal`
+    use hal::{
+        delay::Delay,
+        gpio::{
+            gpiod::{Parts, PD12, PD13, PD14, PD15},
+            Output, PushPull,
+        },
+        rcc::Rcc, // Constrained RCC peripheral
+    };
+    
+    // Set to `false` when u don't need that anymore
+    const ENABLE_DEBUG: bool = true;
+    
+    #[entry]
+    fn main() -> ! {
+        if ENABLE_DEBUG {
+            let _ = hprintln!("STM32F4 GPIO Led demo is running >>>>>");
+        }
+    
+        let stm32407_peripherals = stm32::Peripherals::take().unwrap();
+        let cortex_m_peripherals = cortex_m::peripheral::Peripherals::take().unwrap();
+    
+        // Set up the LEDs. Below LED info copied from STM32F4Discovery user manual:
+        //
+        // • User LD3: orange LED is a user LED connected to the I/O PD13 of the STM32F407VGT6.
+        // • User LD4: green LED is a user LED connected to the I/O PD12 of the STM32F407VGT6.
+        // • User LD5: red LED is a user LED connected to the I/O PD14 of the STM32F407VGT6.
+        // • User LD6: blue LED is a user LED connected to the I/O PD15 of the STM32F407VGT6.
+        //
+        // All those LED pins group into the port `D` which defined here:
+        // https://docs.rs/stm32f4xx-hal/0.8.3/stm32f4xx_hal/stm32/struct.GPIOD.html#method.split
+        //
+        // `GPIOD.splt()` return a `Parts` struct instance which include all pins with the default
+        // <MODE<type state>> which is `Input<Floating>`:
+        // https://docs.rs/stm32f4xx-hal/0.8.3/stm32f4xx_hal/gpio/gpiod/struct.Parts.html
+        let gpiod: Parts = stm32407_peripherals.GPIOD.split();
+    
+        // Take all those LED pins and convert into `Output` mode with `PushPull` type state
+        let mut green_led: PD12<Output<PushPull>> = gpiod.pd12.into_push_pull_output();
+        let mut orange_led: PD13<Output<PushPull>> = gpiod.pd13.into_push_pull_output();
+        let mut red_led: PD14<Output<PushPull>> = gpiod.pd14.into_push_pull_output();
+        let mut blue_led: PD15<Output<PushPull>> = gpiod.pd15.into_push_pull_output();
+    
+        // Set up the system clock. We want to run at 16Mhz for this one.
+        let constrained_rcc_peripheral: Rcc = stm32407_peripherals.RCC.constrain();
+        let clocks = constrained_rcc_peripheral.cfgr.sysclk(16.mhz()).freeze();
+    
+        // Create a delay abstraction based on SysTick
+        let mut delay = Delay::new(cortex_m_peripherals.SYST, clocks);
+    
+        // I don't know how the `sysclk` works and how to set the correct `Mhz`, but for now,
+        // the `excepted_delay_time_in_ms` needs to cut half for getting the correct delay time.
+        let excepted_delay_time_in_ms = 1000u32;
+        let delay_time_in_ms = (excepted_delay_time_in_ms / 2) as u32;
+    
+        loop {
+            // On for 1s
+            green_led.set_high().unwrap();
+            orange_led.set_high().unwrap();
+            red_led.set_high().unwrap();
+            blue_led.set_high().unwrap();
+    
+            delay.delay_ms(delay_time_in_ms);
+    
+            // off for 1s
+            green_led.set_low().unwrap();
+            orange_led.set_low().unwrap();
+            red_led.set_low().unwrap();
+            blue_led.set_low().unwrap();
+    
+            delay.delay_ms(delay_time_in_ms);
+        }
+    }
+
+    ```
+
+- How to run it with hot-load behavior
+
+    ```rust
+    # cd demo
+    cargo watch -c --exec 'run --example gpio_led'
+    ```
+    Every time you save `demo/examples/gpio_led.rs`, `cargo run --example gpio_led` will run again.
+
+    And you should be able to see the console log like below:
+
+    ![gpio-led-demo.png](book/images/gpio-led-demo.png)
+
+    Also, see the blinking LED in dev board UI:
+
+    ![gpio-led-demo.png](book/images/gpio-led-demo.gif)
+
+</br>
