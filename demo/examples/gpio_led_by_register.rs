@@ -65,21 +65,16 @@ fn main() -> ! {
     unsafe {
         // Set `GPIOD` pin12 ~ pin15 to OUTPUT mode
 
+        // Keep the prev value and add (`|`) new setting:
         // bit 25, 24 set to `01`
-        *gpiod_moder_mut_ptr = 1 << 24; 
-
-        // Keep the prev value and add (`|`) new setting: bit 27, 26 set to `01`
-        *gpiod_moder_mut_ptr = *gpiod_moder_ptr | (1 << 26); 
-
-        // Keep the prev value and add (`|`) new setting: bit 29, 28 set to `01`
-        *gpiod_moder_mut_ptr = *gpiod_moder_ptr | (1 << 28); 
-
-        // Keep the prev value and add (`|`) new setting: bit 31, 30 set to `01`
-        *gpiod_moder_mut_ptr = *gpiod_moder_ptr | (1 << 30); 
+        // bit 27, 26 set to `01`
+        // bit 29, 28 set to `01`
+        // bit 31, 30 set to `01`
+        *gpiod_moder_mut_ptr |= (1 << 24) | (1 << 26) | (1 << 28) | (1 << 30);
 
         // Let's print the "GPIOD_MODER" register bit value (32bit, 4 bytes), and it should be:
         // 0b01010101000000000000000000000000
-        // 
+        //
         // From right to left is bit0 ~ bit31, only bit24, bit26, bit 28, bit30 set to `1`.
         let _ = hprintln!("GPIOD_MODER: {:#034b}", *gpiod_moder_ptr);
     }
@@ -97,10 +92,7 @@ fn main() -> ! {
     unsafe {
         // Set bit (pin) 12 ~ 15 to `1` to turn on 4 LEDs. As the "GPIOD_BSRR" does nothing when
         // set bit to `0`, that's why we don't need to `|` the prev register value:)
-        *gpiod_bsrr_mut_ptr = 1 << 12;
-        *gpiod_bsrr_mut_ptr = 1 << 13;
-        *gpiod_bsrr_mut_ptr = 1 << 14;
-        *gpiod_bsrr_mut_ptr = 1 << 15;
+        *gpiod_bsrr_mut_ptr = (1 << 12) | (1 << 13) | (1 << 14) | (1 << 15);
     }
 
     let _ = hprintln!("\nDelay 1s......\n");
@@ -109,10 +101,7 @@ fn main() -> ! {
     unsafe {
         // Set bit (pint) 12 + 16, 13 + 16 to `1` to turn off 2 LEDs. As the "GPIOD_BSRR" does nothing when
         // set bit to `0`, that's why we don't need to `|` the prev register value:)
-        *gpiod_bsrr_mut_ptr = 1 << (12 + 16);
-        *gpiod_bsrr_mut_ptr = 1 << (13 + 16);
-        // *gpiod_bsrr_mut_ptr = 1 << (14 + 16);
-        // *gpiod_bsrr_mut_ptr = 1 << (15 + 16);
+        *gpiod_bsrr_mut_ptr = (1 << (12 + 16)) | (1 << (13 + 16));
     }
 
     loop {}
