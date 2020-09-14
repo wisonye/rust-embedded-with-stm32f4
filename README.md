@@ -29,6 +29,7 @@ All commands below are running on **macOS**. I will provide the link to **Window
 - [_4.2.1.2 How to configure the `GPIO` port `D` to **output** mode_](#how-to-configure-gpio-d-to-output-mode)
 - [_4.2.1.3 How to set the `GPIO` port `D` (pin12 ~ pin15) to `High` or `Low`_](#how-to-toggle-gpiod-pin-voltage)
 - [_4.3 Finally, Let's put all together: use raw GPIO register to control LED_](#use-raw-gpio-register-to-control-led)
+- [_4.4 The fun part, code comparison_](#fun-part-code-comparison)
 
 [**5. What is the `Clock` and how to use it**](#what-is-the-clock-and-how-to-use-it)
 
@@ -997,6 +998,30 @@ So what information we got here?
 
 </br>
 
-[**5. What is the `Clock` and how to use it**](#what-is-the-clock-and-how-to-use-it)
+#### <a name="fun-part-code-comparison">5. The fun part, code comparison</a>
+
+As maybe some of you are wondering which `coding solution` is better: The `HAL` one? or the `Low-level` one?
+
+Let's make a code comparison to have a look (left-side is `HAL`, right-side is `Low-level`):
+
+![code-comparison](book/images/code-compare.png)
+
+- `HAL` pros and cons:
+    - It looks like less code (total lines for the same purpose).
+    - It can fit all `STM32` series, just change the `features` in `Cargo.toml`.
+    - But of course, you need to spent more time to learn the `HAL` crate and get familiar with it (concepts, structs, modules and functions).
+
+</br>
+
+- `Low-level` pros and cons:
+    - Sometimes a little more code to setup the registers.
+    - Not guaranteed can fit for all `STM32` series (actually, that's not possible).
+    - It’s simple and good for hardware background developer: Just open the reference manual and check the particular register, then start to code. All you needed just the basic computer knowledge: bit operation.
+
+_So that means no right answer, it totally depends on **YOU:)**_
+
+</br>
+
+## <a name="what-is-the-clock-and-how-to-use-it">5. What is the `Clock` and how to use it</a>
 
 Up coming soon ...... :)
