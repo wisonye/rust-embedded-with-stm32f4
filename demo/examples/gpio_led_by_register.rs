@@ -50,7 +50,7 @@ fn main() -> ! {
     const RCC_AHB1ENR_REGISTER: u32 = RCC_REGISTER + 0x30; // page 242, 243
     const RCC_AHB1LPENR_REGISTER: u32 = RCC_REGISTER + 0x50; // Low power (sleep) mode, page 250, 252,
     unsafe {
-        // Enable `GPIOD` at bit 3
+        // Enable `GPIOD` by setting the `bit3` to `1` for both registers.
         *(RCC_AHB1ENR_REGISTER as *mut u32) = 1 << 3;
         *(RCC_AHB1LPENR_REGISTER as *mut u32) = 1 << 3;
     }
