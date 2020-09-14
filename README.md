@@ -998,7 +998,7 @@ So what information we got here?
 
 </br>
 
-#### <a name="fun-part-code-comparison">5. The fun part, code comparison</a>
+#### <a name="fun-part-code-comparison">4.4 The fun part, code comparison</a>
 
 As maybe some of you are wondering which `coding solution` is better: The `HAL` one? or the `Low-level` one?
 
