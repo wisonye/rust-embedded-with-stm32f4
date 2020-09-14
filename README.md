@@ -1,18 +1,19 @@
-# All-in-one Manual For `Rust` Embedded programming on `Mac`
-
-In this manual, we will cover all the knowledge we need to know for using `Rust` to do embedded programming.
+# All-in-one Rust Embedded Programming Manual for STM32F4 series
+In this manual, we will cover all the pieces of knowledge we need to know for using `Rust` to do embedded programming.
 
 And we pick the `ARM-based MCU STM32F4` series chips as our target to run all the demos.
 
+All commands below are running on **macOS**. I will provide the link to **Windows** and **Linux** as well.
+
 [**1. Important concepts**](#important-concepts)
-- [_1.1 What is `MCU` and `Soc` ? What makes it different than `SBC`?_](#what-is-mcu)
+- [_1.1 What is `MCU` and `Soc`? What makes it different than `SBC`?_](#what-is-mcu)
 - [_1.2 What is `STM32`?_](#what-is-stm32)
 - [_1.3 The hardware we will use in the demo_](#the-hardware-we-will-use-in-the-demo)
 
 [**2. Setup Environment**](#setup-environment)
 - [_2.1 Install tooling_](#install-tooling)
-- [_2.2 Create `demo` project from template_](#create-demo-project-from-template)
-- [_2.3 Run hello example in `QEMU` and set break point in `ARM GDB`_](#run-hello-example-in-qemu)
+- [_2.2 Create a `demo` project from exists template_](#create-demo-project-from-template)
+- [_2.3 Run hello example in `QEMU` and set a breakpoint in `ARM GDB`_](#run-hello-example-in-qemu)
 - [_2.3.1 Run hello example in hardware_](#run-hello-example-in-hardware)
 - [_2.3.2 Debugging in `vim` with the `ARM GDB`_](#debugging-in-vim-gdb)
 
@@ -33,7 +34,7 @@ And we pick the `ARM-based MCU STM32F4` series chips as our target to run all th
 
 ## <a name="important-concepts">1. Important concepts</a>
 
-#### <a name="what-is-mcu">1.1 What is `MCU` and `Soc` ? What makes it different than `SBC`?</a>
+#### <a name="what-is-mcu">1.1 What is `MCU` and `Soc`? What makes it different than `SBC`?</a>
 
 - `MCU` stands for `Microcontroller Unit`.
 - `Soc` stands for `System-on-chip`.
@@ -81,13 +82,18 @@ About the `STM32F407VG`:
 
 High-performance foundation line, ARM **Cortex-M4** core with **DSP** and **FPU**, 1 Mbyte Flash, 168 MHz CPU, ART Accelerator, Ethernet, FSMC
 
-More hardware details at [here](https://www.st.com/content/st_com/en/products/microcontrollers-microprocessors/stm32-32-bit-arm-cortex-mcus/stm32-high-performance-mcus/stm32f4-series/stm32f407-417/stm32f407vg.html), and the datasheet at [here](https://www.st.com/resource/en/datasheet/stm32f407vg.pdf).
+More hardware details at [here](https://www.st.com/content/st_com/en/products/microcontrollers-microprocessors/stm32-32-bit-arm-cortex-mcus/stm32-high-performance-mcus/stm32f4-series/stm32f407-417/stm32f407vg.html),
+[datasheet](./stm32f407vg-datasheet.pdf) and [reference manual](./stm32f4-reference-manual.pdf).
 
+**STM32F407G-DISC1** dev board [user manual](./Discovery_kit_withlSTM32F407VG_MCU_user_manual.pdf).
+
+</br>
 
 ## <a name="setup-environment">2. Setup environment</a>
 
-Before we can write rust and test it on emulator or the real hardware, we need to install 
-some tools below:
+Before writing rust code and test it on emulator or the real hardware, we need to install some tools below:
+
+_For **Windows** and **Linux**, plz go to [here](https://rust-embedded.github.io/book/intro/install.html)._
 
 #### <a name="install-tooling">2.1 Install tooling</a>
 - `rust` and related binaries
@@ -127,7 +133,7 @@ some tools below:
     ```
 
     `QEMU` is a generic and open source machine emulator. By default, it doesn't
-    support `STM32F4`, below is the steps how to make that happen:
+    support `STM32F4`, below are the steps how to make that happen:
 
     ```bash
     # Detail is here: https://xpack.github.io/qemu-arm/install/
@@ -183,7 +189,7 @@ some tools below:
 
 </br>
 
-#### <a name="create-demo-project-from-template">2.2 Create `demo` project from template</a>
+#### <a name="create-demo-project-from-template">2.2 Create a `demo` project from exists template</a>
 
 ```bash
 cargo generate --git https://github.com/rust-embedded/cortex-m-quickstart
@@ -192,7 +198,7 @@ cargo generate --git https://github.com/rust-embedded/cortex-m-quickstart
 
 </br>
 
-#### <a name="run-hello-example-in-qemu">2.3 Run hello example in `QEMU` and set break point in `ARM GDB`</a>
+#### <a name="run-hello-example-in-qemu">2.3 Run hello example in `QEMU` and set a breakpoint in `ARM GDB`</a>
 
 - Add the below settings to `.cargo/config` 
 
@@ -233,10 +239,10 @@ cargo generate --git https://github.com/rust-embedded/cortex-m-quickstart
     Breakpoint 1 at 0x484: file examples/hello.rs, line 13.
 
     (gdb) step
-    (gdb) print &x
-    (gdb) next
-    (gdb) continue 
-    (gdb) stop 
+    #(gdb) print &x
+    #(gdb) next
+    #(gdb) continue 
+    #(gdb) stop 
     (gdb) quit
     ```
 
@@ -568,7 +574,7 @@ Each peripheral includes a couple of registers which call `RegisterBlock` in `st
 
 If you have no idea about what those registers for, just leave it at this moment, we will get into the detail later.
 
-But before dive into the **GPIO** register, let's take a look at how those peripherals are connected. Below is the `STM32F4 block diagram` in `reference manual` (page 19):
+But before dive into the **GPIO** register, let's take a look at how those peripherals are connected. Below is the `STM32F4 block diagram` in [`datasheet`](./stm32f407vg-datasheet.pdf) (page 19):
 
 ![stm32f4-bus-peripheral-diagram.png](book/images/stm32f4-bus-peripheral-diagram.png)
 
@@ -617,7 +623,7 @@ Usually, we need a few steps to control the particular peripheral registers:
 - Configure it
 - Read data from or write data to it
 
-All steps above need the register memory address and we can find it in the `reference manual`.
+All steps above need the register memory address and we can find it in the [`reference manual`](./stm32f4-reference-manual.pdf).
 
 In the next demo, we want to turn-on and turn-off the onboard LEDs. For the first step, we need to open 
 [Discovery_kit_withlSTM32F407VG_MCU_user_manual.pdf](./Discovery_kit_withlSTM32F407VG_MCU_user_manual.pdf) and jump to page 16, then we can see the info below:
@@ -641,7 +647,7 @@ Let's walk through all those steps to reach our goal:
 When you first turn on the `MCU`, everything turns off for power saving. We need to enable the **GPIOD**.
 And here are the tips: 
 
-- Search `gpioded` which stands for "gpiod enable" in the `reference manual`, then we got this at page 243:
+- Search `gpioded` which stands for "gpiod enable" in the [`reference manual`](./stm32f4-reference-manual.pdf), then we got this at page 243:
 
     ![rcc_ahb1enr_enable_gpiod.png](book/images/rcc_ahb1enr_enable_gpiod.png)
 
@@ -680,7 +686,7 @@ And here are the tips:
     
     ###### _**RCC** stand for **Reset and Clock Control**_
     
-    There is an **RCC register map** table in `reference manual` page 265 as well.
+    There is an **RCC register map** table in [`reference manual`](./stm32f4-reference-manual.pdf) page 265 as well.
 
     </br>
 
@@ -701,7 +707,7 @@ And here are the tips:
 
 ##### <a name="how-to-configure-gpio-d-to-output-mode">4.2.1.1 How to configure the `GPIO` port `D` to **output** mode</a>
 
-Let's go to the `reference manual` page 281, then we will see the info below:
+Let's go to the [`reference manual`](./stm32f4-reference-manual.pdf) page 281, then we will see the info below:
 
 <hr>
 
@@ -731,10 +737,10 @@ So what information we got here?
 - Then we're able to write `rust` code to configure **GPIOD** work in **output** mode like below:
 
     ```rust
-    // `GPIOD` register mapping address, in `reference manual` (page 65, `STM32F4xx register boundary addresses`).
+    // `GPIOD` register mapping address, in `reference manual` page 65, (`STM32F4xx register boundary addresses`).
     const GPIOD_REGISTER: u32 = 0x40020c00;
 
-    // GPIO port mode register (GPIOx_MODER) address, `reference manual` (page 281).
+    // GPIO port mode register (GPIOx_MODER) address, `reference manual` page 281.
     const GPIOD_MODER: u32 = GPIOD_REGISTER + 0x00;
     let gpiod_moder_mut_ptr: *mut u32 = GPIOD_MODER as *mut u32; // Mutable raw pointer
     let gpiod_moder_ptr: *const u32 = GPIOD_MODER as *const u32; // Immutable raw pointer
@@ -760,7 +766,7 @@ So what information we got here?
         let _ = hprintln!("GPIOD_MODER: {:#034b}", *gpiod_moder_ptr);
     }
 
-    // GPIO port output type register (GPIOx_OTYPER) address, `reference manual` (page 281).
+    // GPIO port output type register (GPIOx_OTYPER) address, `reference manual` page 281.
     // As the output type `push-pull` is `0`, then we don't need to set `GPIOD_OTYPER` explicitly.
     // const GPIOD_OTYPER: u32 = GPIOD_REGISTER + 0x04;
     ```
@@ -769,7 +775,7 @@ So what information we got here?
 
 ##### <a name="how-to-toggle-gpiod-pin-voltage">4.2.1.3 How to set the `GPIO` port `D` (pin12 ~ pin15) to `High` or `Low`</a>
 
-Let's go to the `reference manual` page 284, then we will see the info below:
+Let's go to the [`reference manual`](./stm32f4-reference-manual.pdf) page 284, then we will see the info below:
 
 <hr>
 
@@ -805,7 +811,7 @@ So what information we got here?
 - Then we're able to write `rust` code to set **pin 12~15** to `High` or `Low` like below:
 
     ```rust
-    // GPIO port bit set/reset register (GPIOx_BSRR) address, `reference manual` (page 284).
+    // GPIO port bit set/reset register (GPIOx_BSRR) address, `reference manual` page 284.
     const GPIOD_BSRR: u32 = GPIOD_REGISTER + 0x18;
     let gpiod_bsrr_mut_ptr = GPIOD_BSRR as *mut u32;
 
