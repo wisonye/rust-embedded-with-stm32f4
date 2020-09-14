@@ -30,6 +30,8 @@ All commands below are running on **macOS**. I will provide the link to **Window
 - [_4.2.1.3 How to set the `GPIO` port `D` (pin12 ~ pin15) to `High` or `Low`_](#how-to-toggle-gpiod-pin-voltage)
 - [_4.3 Finally, Let's put all together: use raw GPIO register to control LED_](#use-raw-gpio-register-to-control-led)
 
+[**5. What is the `Clock` and how to use it**](#what-is-the-clock-and-how-to-use-it)
+
 <hr>
 
 ## <a name="important-concepts">1. Important concepts</a>
@@ -616,6 +618,8 @@ It sounds crazy, but let's only focus on the registers below:
 - **GPIOx_ODR**: Output data register, it's responsible for writing data to the GPIO pin. _But we don't use it, we use **GPIOx_BSRR** instead, that's an atomic write operation._
 - **GPIOx_BSRR**: Bit set/reset register, use to write **High** or reset to **Low** to the GPIO pin.
 
+</br>
+
 #### <a name="how-to-control-gpio-register">4.2.1 How to control the GPIO register</a>
 
 Usually, we need a few steps to control the particular peripheral registers:
@@ -789,7 +793,7 @@ So what information we got here?
 
     - How to set `High`, take a look at the green highlighted part:
         - `bit0` to `bit15` means **pin 0** to **pin 15** and use to set `High`
-        - After setting `High` (`1`), it will set the corresponding **GPIOD_ODR** bit
+        - After setting to `1`, it will set the corresponding **GPIOD_ODR** register bit
         - Nothing will happen when setting the `0` to the specified bit
         - For setting the **pin 12** to `High`, we need to set `bit12` to `1`
         - ...
@@ -799,7 +803,7 @@ So what information we got here?
 
     - How to set `Low`, take a look at the red highlighted part:
         - `bit16` to `bit31` means **pin 0** to **pin 15** and use to set `Low`
-        - After setting `High` (`1`), it will set the corresponding **GPIOD_ODR** bit
+        - After setting to `1`, it will set the corresponding **GPIOD_ODR** register bit
         - Nothing will happen when setting the `0` to the specified bit
         - For setting the **pin 12** to `Low`, we need to set `bit(12 + 16)` to `1`
         - ...
@@ -1014,3 +1018,7 @@ So what information we got here?
     ![gpio-register-led-demo.gif](book/images/gpio-register-led-demo.gif)
 
 </br>
+
+[**5. What is the `Clock` and how to use it**](#what-is-the-clock-and-how-to-use-it)
+
+Up coming soon ...... :)
