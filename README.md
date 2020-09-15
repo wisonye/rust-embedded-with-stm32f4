@@ -26,8 +26,9 @@ All commands below are running on **macOS**. I will provide the link to **Window
 - [_4.2 STM32F4 **GPIOP** registers_](#mcu-gpio-register)
 - [_4.2.1 How to control **GPIO register**_](#how-to-control-gpio-register)
 - [_4.2.1.1 How to enable the `GPIO` port `D`_](#how-to-enable-gpio-d)
-- [_4.2.1.2 How to configure the `GPIO` port `D` to **output** mode_](#how-to-configure-gpio-d-to-output-mode)
-- [_4.2.1.3 How to set the `GPIO` port `D` (pin12 ~ pin15) to `High` or `Low`_](#how-to-toggle-gpiod-pin-voltage)
+- [_4.2.1.2 If you don't know the bitwise operation?_](#if-you-dont-know-the-bitwise-operation)
+- [_4.2.1.3 How to configure the `GPIO` port `D` to **output** mode_](#how-to-configure-gpio-d-to-output-mode)
+- [_4.2.1.4 How to set the `GPIO` port `D` (pin12 ~ pin15) to `High` or `Low`_](#how-to-toggle-gpiod-pin-voltage)
 - [_4.3 Finally, Let's put all together: use raw GPIO register to control LED_](#use-raw-gpio-register-to-control-led)
 - [_4.4 The fun part, code comparison_](#fun-part-code-comparison)
 
@@ -710,7 +711,15 @@ And here are the tips:
 
 </br>
 
-##### <a name="how-to-configure-gpio-d-to-output-mode">4.2.1.1 How to configure the `GPIO` port `D` to **output** mode</a>
+##### <a name="if-you-dont-know-the-bitwise-operation">4.2.1.2 If you don't know the bitwise operation?</a>
+
+Just a quick tips if you don't know (or totally forgot what you learned from school), here is how you handle the bitwise operation:
+
+![bitwise-operation.png](book/images/bitwise-operation.png)
+
+</br>
+
+##### <a name="how-to-configure-gpio-d-to-output-mode">4.2.1.3 How to configure the `GPIO` port `D` to **output** mode</a>
 
 Let's go to the [`reference manual`](./stm32f4-reference-manual.pdf) page 281, then we will see the info below:
 
@@ -773,7 +782,7 @@ So what information we got here?
 
 </br>
 
-##### <a name="how-to-toggle-gpiod-pin-voltage">4.2.1.3 How to set the `GPIO` port `D` (pin12 ~ pin15) to `High` or `Low`</a>
+##### <a name="how-to-toggle-gpiod-pin-voltage">4.2.1.4 How to set the `GPIO` port `D` (pin12 ~ pin15) to `High` or `Low`</a>
 
 Let's go to the [`reference manual`](./stm32f4-reference-manual.pdf) page 284, then we will see the info below:
 
