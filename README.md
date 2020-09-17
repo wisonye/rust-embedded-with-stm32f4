@@ -30,9 +30,14 @@ All commands below are running on **macOS**. I will provide the link to **Window
 - [_4.2.1.3 How to configure the `GPIO` port `D` to **output** mode_](#how-to-configure-gpio-d-to-output-mode)
 - [_4.2.1.4 How to set the `GPIO` port `D` (pin12 ~ pin15) to `High` or `Low`_](#how-to-toggle-gpiod-pin-voltage)
 - [_4.3 Finally, Let's put all together: use raw GPIO register to control LED_](#use-raw-gpio-register-to-control-led)
-- [_4.4 The fun part, code comparison_](#fun-part-code-comparison)
+- [_4.4 Let's fix the bug in release build_](#fix-the-bug-in-release-build)
+- [_4.5 The fun part, code comparison_](#fun-part-code-comparison)
 
-[**5. What is the `Clock` and how to use it**](#what-is-the-clock-and-how-to-use-it)
+[**5. What is the `Interrupt` and how to use it**](#what-is-the-interrupt-and-how-to-use-it)
+
+[**6. What is the `Clock` and how to use it**](#what-is-the-clock-and-how-to-use-it)
+
+[**7. About optimizing the binary size**](#about-optimize-the-binary-size)
 
 <hr>
 
@@ -828,7 +833,9 @@ So what information we got here?
 
     unsafe {
         // Set bit (pin) 12 ~ 15 to `1` to turn on 4 LEDs. As the "GPIOD_BSRR" does nothing when
-        // set bit to `0`, that's why we don't need to `|` the prev register value:)
+        //
+        // As the "GPIOD_BSRR" does nothing when setting bit to `0`, so actually, we even don't 
+        // need the `|=` for keeping the previous value.
         *gpiod_bsrr_mut_ptr = (1 << 12) | (1 << 13) | (1 << 14) | (1 << 15);
     }
 
@@ -837,7 +844,9 @@ So what information we got here?
 
     unsafe {
         // Set bit (pint) 12 + 16, 13 + 16 to `1` to turn off 2 LEDs. As the "GPIOD_BSRR" does nothing when
-        // set bit to `0`, that's why we don't need to `|` the prev register value:)
+        //
+        // As the "GPIOD_BSRR" does nothing when setting bit to `0`, so actually, we even don't 
+        // need the `|=` for keeping the previous value.
         *gpiod_bsrr_mut_ptr = (1 << (12 + 16)) | (1 << (13 + 16));
     }
     ```
@@ -845,7 +854,7 @@ So what information we got here?
 
 #### <a name="use-raw-gpio-register-to-control-led">4.3 Finally, Let's put all together: use raw GPIO register to control LED</a>
 
-- Make sure your `Cargo.toml` has the settings below:
+- Make sure your `Cargo.toml` has the settings below, we don't need `PAL` or `HAL` crate anymore, as we will use low-level implementation:
 
     ```rust
     [dependencies]
@@ -861,7 +870,7 @@ So what information we got here?
     # stm32f4 = { version = "0.11.0", features = ["stm32f407", "rt"] }
     
     # HAL (Hardware Abstraction Layer)
-    stm32f4xx-hal = { version = "0.8.3", features = ['stm32f407'] }
+    # stm32f4xx-hal = { version = "0.8.3", features = ['stm32f407'] }
     ```
 
 - Make sure your `.cargo/config` has the settings below:
@@ -882,23 +891,20 @@ So what information we got here?
     #![no_std]
     #![no_main]
     
+    use cortex_m::asm::delay;
     use cortex_m_rt::entry;
     use cortex_m_semihosting::hprintln;
     use panic_semihosting as _;
     
-    use crate::hal::{
-        prelude::*,
-        stm32, // The `stm32` should means `stm32f407` which enable by the `features` in `.toml`
-    };
-    
-    // This is very important!!!
-    use stm32f4xx_hal as hal;
-    
-    // Import from `stm32f4xx_hal`
-    use hal::{delay::Delay, rcc::Rcc};
-    
     // Set to `false` when u don't need that anymore
     const ENABLE_DEBUG: bool = true;
+    
+    // As we don't use `PAC` and `HAL` in this example, and we didn't touch the `Clock` and
+    // `Interrupt` yet. That's why we use a dumb version `delay` at this moment. It's not
+    // accuracy, that's fine, as that's not the point we focus on at this moment.
+    fn dumb_delay(millisecond: u32) {
+        delay(100_000 * millisecond);
+    }
     
     #[entry]
     fn main() -> ! {
@@ -906,28 +912,13 @@ So what information we got here?
             let _ = hprintln!("STM32F4 GPIO Register Led demo is running >>>>>");
         }
     
-        let stm32407_peripherals = stm32::Peripherals::take().unwrap();
-        let cortex_m_peripherals = cortex_m::peripheral::Peripherals::take().unwrap();
-    
-        // Set up the system clock. We want to run at 16Mhz for this one.
-        let constrained_rcc_peripheral: Rcc = stm32407_peripherals.RCC.constrain();
-        let clocks = constrained_rcc_peripheral.cfgr.sysclk(16.mhz()).freeze();
-    
-        // Create a delay abstraction based on SysTick
-        let mut delay = Delay::new(cortex_m_peripherals.SYST, clocks);
-    
-        // I don't know how the `sysclk` works and how to set the correct `Mhz`, but for now,
-        // the `excepted_delay_time_in_ms` needs to cut half for getting the correct delay time.
-        let excepted_delay_time_in_ms = 1000u32;
-        let delay_time_in_ms = (excepted_delay_time_in_ms / 2) as u32;
-    
         // Below is the very important step:
         //
         // When you first turn on the `MCU`, everything turns off for power saving. We need to enable
         // the `GPIOD` port. Info in `reference manual` (page 265, RCC register map).
         //
         // RCC (Reset and Clock Control)
-        const RCC_REGISTER: u32 = 0x40023800;
+        const RCC_REGISTER: u32 = 0x4002_3800;
         const RCC_AHB1ENR_REGISTER: u32 = RCC_REGISTER + 0x30; // page 242, 243
         const RCC_AHB1LPENR_REGISTER: u32 = RCC_REGISTER + 0x50; // Low power (sleep) mode, page 250, 252,
         unsafe {
@@ -937,7 +928,7 @@ So what information we got here?
         }
     
         // `GPIOD` register mapping address, in `reference manual` (page 65, `STM32F4xx register boundary addresses`).
-        const GPIOD_REGISTER: u32 = 0x40020c00;
+        const GPIOD_REGISTER: u32 = 0x4002_0c00;
     
         // GPIO port mode register (GPIOx_MODER) address, `reference manual` (page 281).
         const GPIOD_MODER: u32 = GPIOD_REGISTER + 0x00;
@@ -951,13 +942,18 @@ So what information we got here?
             // bit 27, 26 set to `01`
             // bit 29, 28 set to `01`
             // bit 31, 30 set to `01`
+            //
+            // As the "GPIOD_BSRR" does nothing when set bit to `0`, so actually, we even don't
+            // need the `|=` for keeping the prev value. But we keep that just doing in the normal
+            // way.
+            //
             *gpiod_moder_mut_ptr |= (1 << 24) | (1 << 26) | (1 << 28) | (1 << 30);
-
+    
             // Let's print the "GPIOD_MODER" register bit value (32bit, 4 bytes), and it should be:
             // 0b01010101000000000000000000000000
-            // 
+            //
             // From right to left is bit0 ~ bit31, only bit24, bit26, bit 28, bit30 set to `1`.
-            let _ = hprintln!("GPIOD_MODER: {:#034b}", *gpiod_moder_ptr);
+            // let _ = hprintln!("GPIOD_MODER: {:#034b}", *gpiod_moder_ptr);
         }
     
         // GPIO port output type register (GPIOx_OTYPER) address, `reference manual` (page 281).
@@ -971,17 +967,21 @@ So what information we got here?
         // Setup GPIOD.P12 ~ P15 to output mode with `
     
         unsafe {
-            // Set bit (pin) 12 ~ 15 to `1` to turn on 4 LEDs. As the "GPIOD_BSRR" does nothing when
-            // set bit to `0`, that's why we don't need to `|` the prev register value:)
+            // Set bit (pin) 12 ~ 15 to `1` to turn on 4 LEDs.
+            //
+            // As the "GPIOD_BSRR" does nothing when setting bit to `0`, so actually, we even don't
+            // need the `|=` for keeping the previous value.
             *gpiod_bsrr_mut_ptr = (1 << 12) | (1 << 13) | (1 << 14) | (1 << 15);
         }
     
         let _ = hprintln!("\nDelay 1s......\n");
-        delay.delay_ms(delay_time_in_ms);
+        dumb_delay(10000);
     
         unsafe {
-            // Set bit (pint) 12 + 16, 13 + 16 to `1` to turn off 2 LEDs. As the "GPIOD_BSRR" does nothing when
-            // set bit to `0`, that's why we don't need to `|` the prev register value:)
+            // Set bit (pint) 12 + 16, 13 + 16 to `1` to turn off 2 LEDs.
+            //
+            // As the "GPIOD_BSRR" does nothing when setting bit to `0`, so actually, we even don't
+            // need the `|=` for keeping the previous value.
             *gpiod_bsrr_mut_ptr = (1 << (12 + 16)) | (1 << (13 + 16));
         }
     
@@ -1007,7 +1007,87 @@ So what information we got here?
 
 </br>
 
-#### <a name="fun-part-code-comparison">4.4 The fun part, code comparison</a>
+#### <a name="fix-the-bug-in-release-build">4.4 Let's fix the bug in release build</a>
+
+Ok, so far, it works well in the **debug** mode. But actually it won't work like what we expected in the **release** mode.
+
+Let's give it a try by running the commands below:
+
+```bash
+# Build and strip the release mode binary
+cargo-strip --target thumbv7em-none-eabi --example gpio_led_by_register --release
+
+# Run that release mode binary in `QEMU`
+qemu-system-gnuarmeclipse -cpu cortex-m4 -mcu STM32F407VG -machine STM32F4-Discovery -semihosting-config enable=on,target=native -kernel target/thumbv7em-none-eabi/release/examples/gpio_led_by_register
+```
+
+And you should see **all LEDs are off and never on!!!** Wow, what happened there???
+
+Let's take a look at the special lines below:
+
+```rust
+60:        *gpiod_moder_mut_ptr |= (1 << 24) | (1 << 26) | (1 << 28) | (1 << 30);
+
+84:        *gpiod_bsrr_mut_ptr = (1 << 12) | (1 << 13) | (1 << 14) | (1 << 15);
+
+95:        *gpiod_bsrr_mut_ptr = (1 << (12 + 16)) | (1 << (13 + 16));
+```
+
+For explaining the **potential bug** there, plz have a look the sample code below:
+
+```rust
+fn main() {
+    let mut a = 10u8;
+    println!("a: {}", a);
+
+    let ptr_to_a = &mut a as *mut u8;
+    unsafe {
+        *ptr_to_a = 50u8;
+        *ptr_to_a = 100u8;
+        *ptr_to_a = 200u8;
+        println!("a: {}", a);
+    }
+}
+```
+
+When building with `--release`, `LLVM` tries to optimize the code. As we assigned three times to the same memory which `ptr_to_a` points to, then `LLVM` may think and see the code like this:
+
+
+```rust
+let ptr_to_a = &mut a as *mut u8;
+unsafe {
+    // *ptr_to_a = 50u8;
+    // *ptr_to_a = 100u8;
+    *ptr_to_a = 200u8;
+    println!("a: {}", a);
+}
+```
+
+That's why our `*gpiod_moder_mut_ptr` be assigned with the `unexpected` value and caused the code work not correct.
+
+So, how to fix it? That's easy, use [`core::ptr::write_volatile()`](https://doc.rust-lang.org/stable/core/ptr/fn.write_volatile.html) and [`core::ptr::read_volatile()`](https://doc.rust-lang.org/stable/core/ptr/fn.read_volatile.html) when we deal with register pointer:
+
+```rust
+
+60:     core::ptr::write_volatile(gpiod_moder_mut_ptr, (1 << 24) | (1 << 26) | (1 << 28) | (1 << 30));
+
+84:     core::ptr::write_volatile(gpiod_bsrr_mut_ptr, (1 << 12) | (1 << 13) | (1 << 14) | (1 << 15));
+
+95:     core::ptr::write_volatile(gpiod_bsrr_mut_ptr, (1 << (12 + 16)) | (1 << (13 + 16)));
+```
+
+The fixed version is in [gpio_led_by_register_fixed.rs](demo/examples/gpio_led_by_register_fixed.rs)
+
+Try it right now, it should work as we expected:
+
+```bash
+cargo-strip --target thumbv7em-none-eabi --example gpio_led_by_register_fixed --release
+qemu-system-gnuarmeclipse -cpu cortex-m4 -mcu STM32F407VG -machine STM32F4-Discovery -semihosting-config enable=on,target=native -kernel target/thumbv7em-none-eabi/release/examples/gpio_led_by_register_fixed
+```
+
+</br>
+
+#### <a name="fun-part-code-comparison">4.5 The fun part, code comparison</a>
 
 As maybe some of you are wondering which `coding solution` is better: The `HAL` one? or the `Low-level` one?
 
@@ -1025,12 +1105,41 @@ Let's make a code comparison to have a look (left-side is `HAL`, right-side is `
 - `Low-level` pros and cons:
     - Sometimes a little more code to setup the registers.
     - Not guaranteed can fit for all `STM32` series (actually, that's not possible).
-    - It’s simple and good for hardware background developer: Just open the reference manual and check the particular register, then start to code. All you needed just the basic computer knowledge: bit operation.
+    - It’s simple and good for hardware background developer: Just open the reference manual and check the particular register, then start to code. All you needed just the basic computer knowledge: bit wise operation.
+    - As no more `PAC` or `HAL` needed, then you got full-control and output the binary size as small as possible.
 
 _So that means no right answer, it totally depends on **YOU:)**_
 
 </br>
 
-## <a name="what-is-the-clock-and-how-to-use-it">5. What is the `Clock` and how to use it</a>
+## <a name="what-is-the-interrupt-and-how-to-use-it">5. What is the `Interrupt` and how to use it</a>
 
 Up coming soon ...... :)
+
+</br>
+
+## <a name="what-is-the-clock-and-how-to-use-it">6. What is the `Clock` and how to use it</a>
+
+Up coming soon ...... :)
+
+</br>
+
+## <a name="about-optimize-the-binary-size">7. About optimizing the binary size</a>
+
+Below are the steps we can optimize the final binary size:
+
+- Remove unnecessary crate import.
+
+- Remove `cortex_m_semihosting` and all `hprintln!()` calls, as we don't need that in production mode.
+
+- Use `cargo-strip` to cut the symbol part which no needed in production mode.
+
+    ```bash
+    cargo strip --target thumbv7em-none-eabi --release --example gpio_led_by_register
+
+    ls -lht target/thumbv7em-none-eabi/release/examples/gpio_led_by_register
+    //  5.7K
+    ```
+
+</br>
+

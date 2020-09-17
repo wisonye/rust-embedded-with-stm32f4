@@ -10,7 +10,7 @@ use panic_semihosting as _;
 const ENABLE_DEBUG: bool = true;
 
 // As we don't use `PAC` and `HAL` in this example, and we didn't touch the `Clock` and
-// `Interrupt` yet. That's why we use a dumb version `delay` at this moment. It's not
+// `Interrupt` yet. That's why we use a dumb version `delay` at this moment. It's not 
 // accuracy, that's fine, as that's not the point we focus on at this moment.
 fn dumb_delay(millisecond: u32) {
     delay(100_000 * millisecond);
@@ -53,11 +53,11 @@ fn main() -> ! {
         // bit 29, 28 set to `01`
         // bit 31, 30 set to `01`
         //
-        // As the "GPIOD_BSRR" does nothing when set bit to `0`, so actually, we even don't
-        // need the `|=` for keeping the prev value. But we keep that just doing in the normal
+        // As the "GPIOD_BSRR" does nothing when set bit to `0`, so actually, we even don't 
+        // need that `|=` for keeping the prev value. But we keep that just doing in the normal
         // way.
         //
-        *gpiod_moder_mut_ptr |= (1 << 24) | (1 << 26) | (1 << 28) | (1 << 30);
+        core::ptr::write_volatile(gpiod_moder_mut_ptr, (1 << 24) | (1 << 26) | (1 << 28) | (1 << 30));
 
         // Let's print the "GPIOD_MODER" register bit value (32bit, 4 bytes), and it should be:
         // 0b01010101000000000000000000000000
@@ -78,10 +78,10 @@ fn main() -> ! {
 
     unsafe {
         // Set bit (pin) 12 ~ 15 to `1` to turn on 4 LEDs.
-        //
-        // As the "GPIOD_BSRR" does nothing when setting bit to `0`, so actually, we even don't
-        // need the `|=` for keeping the previous value.
-        *gpiod_bsrr_mut_ptr = (1 << 12) | (1 << 13) | (1 << 14) | (1 << 15);
+        // 
+        // As the "GPIOD_BSRR" does nothing when setting bit to `0`, so actually, we even don't 
+        // need that `|=` for keeping the previous value.
+        core::ptr::write_volatile(gpiod_bsrr_mut_ptr, (1 << 12) | (1 << 13) | (1 << 14) | (1 << 15));
     }
 
     let _ = hprintln!("\nDelay 1s......\n");
@@ -90,9 +90,9 @@ fn main() -> ! {
     unsafe {
         // Set bit (pint) 12 + 16, 13 + 16 to `1` to turn off 2 LEDs.
         //
-        // As the "GPIOD_BSRR" does nothing when setting bit to `0`, so actually, we even don't
-        // need the `|=` for keeping the previous value.
-        *gpiod_bsrr_mut_ptr = (1 << (12 + 16)) | (1 << (13 + 16));
+        // As the "GPIOD_BSRR" does nothing when setting bit to `0`, so actually, we even don't 
+        // need that `|=` for keeping the previous value.
+        core::ptr::write_volatile(gpiod_bsrr_mut_ptr, (1 << (12 + 16)) | (1 << (13 + 16)));
     }
 
     loop {}

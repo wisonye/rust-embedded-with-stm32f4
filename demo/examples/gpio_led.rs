@@ -62,8 +62,8 @@ fn main() -> ! {
 
     // I don't know how the `sysclk` works and how to set the correct `Mhz`, but for now,
     // the `excepted_delay_time_in_ms` needs to cut half for getting the correct delay time.
-    let excepted_delay_time_in_ms = 1000u32;
-    let delay_time_in_ms = (excepted_delay_time_in_ms / 2) as u32;
+    let expected_delay_time_in_ms = 1000u32;
+    let delay_time_in_ms = (expected_delay_time_in_ms / 2) as u32;
 
     loop {
         // On for 1s

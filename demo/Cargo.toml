@@ -18,7 +18,7 @@ panic-semihosting = { version = "0.5.3", features = ['exit'] }
 # stm32f4 = { version = "0.11.0", features = ["stm32f407", "rt"] }
 
 # HAL (Hardware Abstraction Layer)
-stm32f4xx-hal = { version = "0.8.3", features = ['stm32f407'] }
+# stm32f4xx-hal = { version = "0.8.3", features = ['stm32f407'] }
 
 # Uncomment for the panic example.
 # panic-itm = "0.4.1"
