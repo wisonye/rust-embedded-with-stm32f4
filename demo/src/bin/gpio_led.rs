@@ -17,7 +17,7 @@ use hal::{
         gpiod::{Parts, PD12, PD13, PD14, PD15},
         Output, PushPull,
     },
-    rcc::Rcc, // Constrained RCC peripheral
+    rcc::{Clocks, Rcc}, // Constrained RCC peripheral
 };
 
 // Set to `false` when u don't need that anymore

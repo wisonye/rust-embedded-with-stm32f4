@@ -329,7 +329,7 @@ Let's try that one-by-one:
     ```
 
 
-- Create [`demo/examples/basic.rs`](demo/examples/basic.rs) with the following code:
+- Create [`demo/src/bin/basic.rs`](demo/src/bin/basic.rs) with the following code:
 
     ```rust
     #![allow(warnings)]
@@ -395,9 +395,9 @@ Let's try that one-by-one:
 
     ```rust
     # cd demo
-    cargo watch -c --exec 'run --example basic'
+    cargo watch -c --exec 'run --bin basic'
     ```
-    Every time you save `demo/examples/basic.rs`, `cargo run --example basic` will run again.
+    Every time you save `demo/src/bin/basic.rs`, `cargo run --bin basic` will run again.
 
     ```rust
     (qemu) System timer demo is running >>>>>
@@ -448,7 +448,7 @@ that's the `MCU` we use.
     ```
 
 
-- Create [`demo/examples/gpio_led.rs`](demo/examples/gpio_led.rs) with the following code:
+- Create [`demo/src/bin/gpio_led.rs`](demo/src/bin/gpio_led.rs) with the following code:
 
     ```rust
     #![no_std]
@@ -543,9 +543,9 @@ that's the `MCU` we use.
 
     ```rust
     # cd demo
-    cargo watch -c --exec 'run --example gpio_led'
+    cargo watch -c --exec 'run --bin gpio_led'
     ```
-    Every time you save `demo/examples/gpio_led.rs`, `cargo run --example gpio_led` will run again.
+    Every time you save `demo/src/bin/gpio_led.rs`, `cargo run --bin gpio_led` will run again.
 
     And you should be able to see the console log like below:
 
@@ -885,7 +885,7 @@ So what information we got here?
     ```
 
 
-- Create [`demo/examples/gpio_led_by_register.rs`](demo/examples/gpio_led_by_register.rs) with the following code:
+- Create [`demo/src/bin/gpio_led_by_register.rs`](demo/src/bin/gpio_led_by_register.rs) with the following code:
 
     ```rust
     #![no_std]
@@ -993,9 +993,9 @@ So what information we got here?
 
     ```rust
     # cd demo
-    cargo watch -c --exec 'run --example gpio_led_by_register'
+    cargo watch -c --exec 'run --bin gpio_led_by_register'
     ```
-    Every time you save `demo/examples/gpio_led_by_register.rs`, `cargo run --example gpio_led_by_register` will run again.
+    Every time you save `demo/src/bin/gpio_led_by_register.rs`, `cargo run --bin gpio_led_by_register` will run again.
 
     And you should be able to see the console log like below:
 
@@ -1015,10 +1015,10 @@ Let's give it a try by running the commands below:
 
 ```bash
 # Build and strip the release mode binary
-cargo-strip --target thumbv7em-none-eabi --example gpio_led_by_register --release
+cargo-strip --target thumbv7em-none-eabi --bin gpio_led_by_register --release
 
 # Run that release mode binary in `QEMU`
-qemu-system-gnuarmeclipse -cpu cortex-m4 -mcu STM32F407VG -machine STM32F4-Discovery -semihosting-config enable=on,target=native -kernel target/thumbv7em-none-eabi/release/examples/gpio_led_by_register
+qemu-system-gnuarmeclipse -cpu cortex-m4 -mcu STM32F407VG -machine STM32F4-Discovery -semihosting-config enable=on,target=native -kernel target/thumbv7em-none-eabi/release/gpio_led_by_register
 ```
 
 And you should see **all LEDs are off and never on!!!** Wow, what happened there???
@@ -1076,13 +1076,13 @@ So, how to fix it? That's easy, use [`core::ptr::write_volatile()`](https://doc.
 95:     core::ptr::write_volatile(gpiod_bsrr_mut_ptr, (1 << (12 + 16)) | (1 << (13 + 16)));
 ```
 
-The fixed version is in [gpio_led_by_register_fixed.rs](demo/examples/gpio_led_by_register_fixed.rs)
+The fixed version is in [gpio_led_by_register_fixed.rs](demo/src/bin/gpio_led_by_register_fixed.rs)
 
 Try it right now, it should work as we expected:
 
 ```bash
-cargo-strip --target thumbv7em-none-eabi --example gpio_led_by_register_fixed --release
-qemu-system-gnuarmeclipse -cpu cortex-m4 -mcu STM32F407VG -machine STM32F4-Discovery -semihosting-config enable=on,target=native -kernel target/thumbv7em-none-eabi/release/examples/gpio_led_by_register_fixed
+cargo-strip --target thumbv7em-none-eabi --bin gpio_led_by_register_fixed --release
+qemu-system-gnuarmeclipse -cpu cortex-m4 -mcu STM32F407VG -machine STM32F4-Discovery -semihosting-config enable=on,target=native -kernel target/thumbv7em-none-eabi/release/gpio_led_by_register_fixed
 ```
 
 </br>
@@ -1135,9 +1135,9 @@ Below are the steps we can optimize the final binary size:
 - Use `cargo-strip` to cut the symbol part which no needed in production mode.
 
     ```bash
-    cargo strip --target thumbv7em-none-eabi --release --example gpio_led_by_register
+    cargo strip --target thumbv7em-none-eabi --release --bin gpio_led_by_register
 
-    ls -lht target/thumbv7em-none-eabi/release/examples/gpio_led_by_register
+    ls -lht target/thumbv7em-none-eabi/release/gpio_led_by_register
     //  5.7K
     ```
 

@@ -63,7 +63,7 @@ fn main() -> ! {
         // 0b01010101000000000000000000000000
         //
         // From right to left is bit0 ~ bit31, only bit24, bit26, bit 28, bit30 set to `1`.
-        // let _ = hprintln!("GPIOD_MODER: {:#034b}", *gpiod_moder_ptr);
+        let _ = hprintln!("GPIOD_MODER: {:#034b}", *gpiod_moder_ptr);
     }
 
     // GPIO port output type register (GPIOx_OTYPER) address, `reference manual` (page 281).
