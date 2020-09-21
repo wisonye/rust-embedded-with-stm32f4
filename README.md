@@ -104,7 +104,7 @@ The company behind the `Arm` trademark (`Arm Holdings`) doesn't actually manufac
 
 - **WeAct Black Pill** board which with the `STM32F411CEU6` high performance `MCU`.
 
-- About the onbaord `STM32F411CEU6` MCU:
+- About the onboard `STM32F411CEU6` MCU:
 
     - High-performance foundation line, ARM **Cortex-M4** core with **DSP**, **FPU** and **MPU**, 512 Kbytes Flash, 100 MHz CPU.
 
