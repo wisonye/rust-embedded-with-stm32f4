@@ -9,6 +9,8 @@ All commands below are running on **macOS**. I will provide the link to **Window
 - [_1.1 What is `MCU` and `Soc`? What makes it different than `SBC`?_](#what-is-mcu)
 - [_1.2 What is `STM32`?_](#what-is-stm32)
 - [_1.3 The hardware we will use in the demo_](#the-hardware-we-will-use-in-the-demo)
+- [_1.3.1 STM32F407G-DISC1 dev board for running on emulator_](#dev-board-for-running-on-emulator)
+- [_1.3.2 WeAct Black Pill for running on the hardware_](#black-pill-for-running-on-hardware)
 
 [**2. Setup Environment**](#setup-environment)
 - [_2.1 Install tooling_](#install-tooling)
@@ -32,6 +34,7 @@ All commands below are running on **macOS**. I will provide the link to **Window
 - [_4.3 Finally, Let's put all together: use raw GPIO register to control LED_](#use-raw-gpio-register-to-control-led)
 - [_4.4 Let's fix the bug in release build_](#fix-the-bug-in-release-build)
 - [_4.5 The fun part, code comparison_](#fun-part-code-comparison)
+- [_4.6 For the rest of the chapters, we pick the low-level (pure register controlling) code style for all demos, why?_](#we-will-choose-low-level-code-style)
 
 [**5. What is the `Interrupt` and how to use it**](#what-is-the-interrupt-and-how-to-use-it)
 
@@ -85,16 +88,33 @@ The company behind the `Arm` trademark (`Arm Holdings`) doesn't actually manufac
 
 ### <a name="the-hardware-we-will-use-in-the-demo">1.3 The hardware we will use in the demo</a>
 
-**STM32F407G-DISC1** (replaces **STM32F4DISCOVERY**) dev board which with the `STM32F407VG` high performance `MCU`.
+#### <a name="dev-board-for-running-on-emulator">1.3.1 STM32F407G-DISC1 dev board for running on emulator</a>
 
-About the `STM32F407VG`:
+- **STM32F407G-DISC1** (replaces **STM32F4DISCOVERY**) dev board which with the `STM32F407VG` high performance `MCU`. Here is the [user manual](./Discovery_kit_withlSTM32F407VG_MCU_user_manual.pdf).
 
-High-performance foundation line, ARM **Cortex-M4** core with **DSP** and **FPU**, 1 Mbyte Flash, 168 MHz CPU, ART Accelerator, Ethernet, FSMC
+- About the onboard `STM32F407VG` MCU:
 
-More hardware details at [here](https://www.st.com/content/st_com/en/products/microcontrollers-microprocessors/stm32-32-bit-arm-cortex-mcus/stm32-high-performance-mcus/stm32f4-series/stm32f407-417/stm32f407vg.html),
+    - High-performance foundation line, ARM **Cortex-M4** core with **DSP** and **FPU**, 1 Mbyte Flash, 168 MHz CPU, ART Accelerator, Ethernet, FSMC
+
+    - More hardware details at [here](https://www.st.com/content/st_com/en/products/microcontrollers-microprocessors/stm32-32-bit-arm-cortex-mcus/stm32-high-performance-mcus/stm32f4-series/stm32f407-417/stm32f407vg.html),
 [datasheet](./stm32f407vg-datasheet.pdf) and [reference manual](./stm32f4-reference-manual.pdf).
 
-**STM32F407G-DISC1** dev board [user manual](./Discovery_kit_withlSTM32F407VG_MCU_user_manual.pdf).
+
+#### <a name="black-pill-for-running-on-hardware">1.3.2 WeAct Black Pill for running on the hardware</a>
+
+- **WeAct Black Pill** board which with the high performance `MCU`.
+
+- About the onbaord `STM32F411CEU6` MCU:
+
+    - High-performance foundation line, ARM **Cortex-M4** core with **DSP**, **FPU** and **MPU**, 512 Kbytes Flash, 100 MHz CPU.
+
+    - [Aliexpress link](https://www.aliexpress.com/item/1005001456186625.html)
+
+    - [TaoBao link](https://item.taobao.com/item.htm?spm=a1z0d.6639537.1997196601.68.27457484mBxcnq&id=594670660262)
+
+    - [STM32-base.org link](https://stm32-base.org/boards/STM32F411CEU6-WeAct-Black-Pill-V2.0)
+
+    - [Official GitHub with detail info and diagram](https://github.com/WeActTC/MiniF4-STM32F4x1)
 
 </br>
 
@@ -1109,6 +1129,36 @@ Let's make a code comparison to have a look (left-side is `HAL`, right-side is `
     - As no more `PAC` or `HAL` needed, then you got full-control and output the binary size as small as possible.
 
 _So that means no right answer, it totally depends on **YOU:)**_
+
+</br>
+
+#### <a name="we-will-choose-low-level-code-style">4.6 For the rest of the chapters, we pick the low-level (pure register controlling) code style for all demos, why?</a>
+
+No matter what knowledge we’re learning, usually 2 steps we can follow:
+
+_1. We only need to know how to use it. For example, turning on a light bulb or turning it off, that’s simple and fit the requirement as a normal user._
+
+_2. We need to know how it works, then we’re able to change it, even improve it. For example, if you're an energy-saving light bulb company, then you have to figure out how the light bulb works and improve it, that’s another story._
+
+That means there isn't an absolute right answer, it’s totally up to you, as you know what you want. But **we will pick the No.2 way to continue learning and use low-level register controlling style to code for the rest of demos**. Why?
+
+- If you know how this works, then no more secrets you don't know,  you're able to build anything you want. And you should have the ability to work on professional `STM32` project in Rust.
+
+- When you're working on your unique project, you got full control. How to say that? 
+
+    - The `PAC` or `HAL` crate both are designed for generic use cases, may not suit your unique hardware product situation. Sometimes, you found that it's pretty not straightforward to reach what you want based on those crates.
+
+    - Those crates are contributed by many people with different background and skill experience, it will have bugs. When you face that, you can't get fixed immediately as that's out of your control. For example, you can't ask for somebody to fix the bug you encountered as soon as possible (as you need that be fixed on your hardware product). That does not make sense for a generic purpose share library.
+
+So that's why we should figure out the theory and the low-level implementation, then we got the benefits below:
+
+_1. We only rely on the STM official reference manual._
+
+_2. We got full control for picking the easy way and straight ahead solution to code._
+
+_3. We can apply immediate fix or improvement idea or solution at any given time._
+
+_4. After we got real experience, we can build our own `PAC` or `HAL` crate and contribute back to the community._
 
 </br>
 
