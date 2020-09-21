@@ -9,7 +9,7 @@ All commands below are running on **macOS**. I will provide the link to **Window
 - [_1.1 What is `MCU` and `Soc`? What makes it different than `SBC`?_](#what-is-mcu)
 - [_1.2 What is `STM32`?_](#what-is-stm32)
 - [_1.3 The hardware we will use in the demo_](#the-hardware-we-will-use-in-the-demo)
-- [_1.3.1 STM32F407G-DISC1 dev board for running on emulator_](#dev-board-for-running-on-emulator)
+- [_1.3.1 STM32F407G-DISC1 dev board for running on the emulator_](#dev-board-for-running-on-emulator)
 - [_1.3.2 WeAct Black Pill for running on the hardware_](#black-pill-for-running-on-hardware)
 
 [**2. Setup Environment**](#setup-environment)
@@ -88,7 +88,7 @@ The company behind the `Arm` trademark (`Arm Holdings`) doesn't actually manufac
 
 ### <a name="the-hardware-we-will-use-in-the-demo">1.3 The hardware we will use in the demo</a>
 
-#### <a name="dev-board-for-running-on-emulator">1.3.1 STM32F407G-DISC1 dev board for running on emulator</a>
+#### <a name="dev-board-for-running-on-emulator">1.3.1 STM32F407G-DISC1 dev board for running on the emulator</a>
 
 - **STM32F407G-DISC1** (replaces **STM32F4DISCOVERY**) dev board which with the `STM32F407VG` high performance `MCU`. Here is the [user manual](./Discovery_kit_withlSTM32F407VG_MCU_user_manual.pdf).
 
@@ -102,7 +102,7 @@ The company behind the `Arm` trademark (`Arm Holdings`) doesn't actually manufac
 
 #### <a name="black-pill-for-running-on-hardware">1.3.2 WeAct Black Pill for running on the hardware</a>
 
-- **WeAct Black Pill** board which with the high performance `MCU`.
+- **WeAct Black Pill** board which with the `STM32F411CEU6` high performance `MCU`.
 
 - About the onbaord `STM32F411CEU6` MCU:
 
