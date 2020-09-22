@@ -327,16 +327,31 @@ Let's try that one-by-one:
 #### <a name="the-basic-example">3.1 The basic example</a>
 
 - Make sure your `Cargo.toml` has the settings below:
+    The `[features]` config tells the compiler know that which feature rely on the particular optional dependencies.
 
     ```rust
+    [features]
+    default = []
+    enable-debug = ["cortex-m-semihosting"]
+    enable-pac = ["stm32f4"]
+    enable-hal = ["stm32f4xx-hal"]
+    
     [dependencies]
     cortex-m = "0.6.0"
     cortex-m-rt = "0.6.10"
-    cortex-m-semihosting = "0.3.3"
     # panic-halt = "0.2.0"
     
     # For debugging purpose, enable `exit` feature
     panic-semihosting = { version = "0.5.3", features = ['exit'] }
+    
+    # Print debug info to host console, optional
+    cortex-m-semihosting = { version = "0.3.3", optional = true }
+    
+    # PAC (Peripheral Access Crate), optional
+    stm32f4 = { version = "0.11.0", features = ["stm32f407", "rt"], optional = true }
+    
+    # HAL (Hardware Abstraction Layer), optional
+    stm32f4xx-hal = { version = "0.8.3", features = ['stm32f407'], optional = true }
     ```
 
 - Make sure your `.cargo/config` has the settings below:
@@ -366,15 +381,13 @@ Let's try that one-by-one:
     // `cortex_m_semihosting` gives us the ability to print the debug info
     // into the host console. But keep in mind that, each write operation
     // is super slow which takes several milliseconds depends on the
-    // hardware!!! Better to use the config to enable the call or not.
+    // hardware!!! That's why we make it as an option feature.
+    #[cfg(feature = "enable-debug")]
     use cortex_m_semihosting::{dbg, hprintln};
     
     // `panic_semihosting` will call `debug::EXIT_FAILURE` after logging the
     // panic message.
     use panic_semihosting as _;
-    
-    // Set to `false` when u don't need that anymore
-    const ENABLE_DEBUG: bool = true;
     
     // We will use the `entry` attribute from the `cortex_m_rt` crate to define
     // the entry point. The entry point function must have signature `fn() -> !;`
@@ -382,9 +395,8 @@ Let's try that one-by-one:
     #[entry]
     fn main() -> ! {
         // `hprintln` returns `Result<(),()>`
-        if ENABLE_DEBUG {
-            let _ = hprintln!("Basic STM32F4 demo is running >>>>>");
-        }
+        #[cfg(feature = "enable-debug")]
+        let _ = hprintln!("Basic STM32F4 demo is running >>>>>");
     
         // Get the singleton `Peripherals` instance. This method can only
         // successfully called **once()**, that's why return an `Option`.
@@ -395,7 +407,8 @@ Let's try that one-by-one:
         // dbg!(peripherals);
     
         let x = 10;
-        if ENABLE_DEBUG {
+        #[cfg(feature = "enable-debug")]
+        {
             hprintln!("x is {}", x);
             dbg!(x);
         }
@@ -409,13 +422,11 @@ Let's try that one-by-one:
     }
     ```
 
-
-
 - How to run
 
     ```rust
     # cd demo
-    cargo watch -c --exec 'run --bin basic'
+    cargo watch -c --exec 'run --bin basic --features "enable-debug"'
     ```
     Every time you save `demo/src/bin/basic.rs`, `cargo run --bin basic` will run again.
 
@@ -437,25 +448,6 @@ In this example, we will use `HAL` crate rather than using `PAC` which provides 
 The `HAL` crate is [`stm32f4xx-hal`](https://crates.io/crates/stm32f4xx-hal), also make sure enable the `stm32f407` feature, as
 that's the `MCU` we use.
 
-- Make sure your `Cargo.toml` has the settings below:
-
-    ```rust
-    [dependencies]
-    cortex-m = "0.6.0"
-    cortex-m-rt = "0.6.10"
-    cortex-m-semihosting = "0.3.3"
-    # panic-halt = "0.2.0"
-    
-    # For debugging purpose, enable `exit` feature
-    panic-semihosting = { version = "0.5.3", features = ['exit'] }
-    
-    # PAC (Peripheral Access Crate)
-    # stm32f4 = { version = "0.11.0", features = ["stm32f407", "rt"] }
-    
-    # HAL (Hardware Abstraction Layer)
-    stm32f4xx-hal = { version = "0.8.3", features = ['stm32f407'] }
-    ```
-
 - Make sure your `.cargo/config` has the settings below:
 
     We need to use the `runner` config without `-nographic`, then `QEMU` will open a dev board GUI, so we can see the blinking LED.
@@ -475,15 +467,21 @@ that's the `MCU` we use.
     #![no_main]
     
     use cortex_m_rt::entry;
+    
+    #[cfg(feature = "enable-debug")]
     use cortex_m_semihosting::hprintln;
+    
     use panic_semihosting as _;
     
+    #[cfg(feature = "enable-hal")]
     use crate::hal::{prelude::*, stm32};
     
     // This is very important!!!
+    #[cfg(feature = "enable-hal")]
     use stm32f4xx_hal as hal;
     
     // Import from `stm32f4xx_hal`
+    #[cfg(feature = "enable-hal")]
     use hal::{
         delay::Delay,
         gpio::{
@@ -493,14 +491,10 @@ that's the `MCU` we use.
         rcc::Rcc, // Constrained RCC peripheral
     };
     
-    // Set to `false` when u don't need that anymore
-    const ENABLE_DEBUG: bool = true;
-    
     #[entry]
     fn main() -> ! {
-        if ENABLE_DEBUG {
-            let _ = hprintln!("STM32F4 GPIO Led demo is running >>>>>");
-        }
+        #[cfg(feature = "enable-debug")]
+        let _ = hprintln!("STM32F4 GPIO Led demo is running >>>>>");
     
         let stm32407_peripherals = stm32::Peripherals::take().unwrap();
         let cortex_m_peripherals = cortex_m::peripheral::Peripherals::take().unwrap();
@@ -535,8 +529,8 @@ that's the `MCU` we use.
     
         // I don't know how the `sysclk` works and how to set the correct `Mhz`, but for now,
         // the `excepted_delay_time_in_ms` needs to cut half for getting the correct delay time.
-        let excepted_delay_time_in_ms = 1000u32;
-        let delay_time_in_ms = (excepted_delay_time_in_ms / 2) as u32;
+        let expected_delay_time_in_ms = 1000u32;
+        let delay_time_in_ms = (expected_delay_time_in_ms / 2) as u32;
     
         loop {
             // On for 1s
@@ -556,14 +550,13 @@ that's the `MCU` we use.
             delay.delay_ms(delay_time_in_ms);
         }
     }
-
     ```
 
 - How to run
 
     ```rust
     # cd demo
-    cargo watch -c --exec 'run --bin gpio_led'
+    cargo watch -c --exec 'run --bin gpio_led --features "enable-debug enable-hal"'
     ```
     Every time you save `demo/src/bin/gpio_led.rs`, `cargo run --bin gpio_led` will run again.
 
@@ -797,6 +790,7 @@ So what information we got here?
         // 0b01010101000000000000000000000000
         // 
         // From right to left is bit0 ~ bit31, only bit24, bit26, bit 28, bit30 set to `1`.
+        #[cfg(feature = "enable-debug")]
         let _ = hprintln!("GPIOD_MODER: {:#034b}", *gpiod_moder_ptr);
     }
 
@@ -858,8 +852,10 @@ So what information we got here?
         // need the `|=` for keeping the previous value.
         *gpiod_bsrr_mut_ptr = (1 << 12) | (1 << 13) | (1 << 14) | (1 << 15);
     }
-
+    
+    #[cfg(feature = "enable-debug")]
     let _ = hprintln!("\nDelay 1s......\n");
+
     delay.delay_ms(delay_time_in_ms);
 
     unsafe {
@@ -873,25 +869,6 @@ So what information we got here?
 </br>
 
 #### <a name="use-raw-gpio-register-to-control-led">4.3 Finally, Let's put all together: use raw GPIO register to control LED</a>
-
-- Make sure your `Cargo.toml` has the settings below, we don't need `PAL` or `HAL` crate anymore, as we will use low-level implementation:
-
-    ```rust
-    [dependencies]
-    cortex-m = "0.6.0"
-    cortex-m-rt = "0.6.10"
-    cortex-m-semihosting = "0.3.3"
-    # panic-halt = "0.2.0"
-    
-    # For debugging purpose, enable `exit` feature
-    panic-semihosting = { version = "0.5.3", features = ['exit'] }
-    
-    # PAC (Peripheral Access Crate)
-    # stm32f4 = { version = "0.11.0", features = ["stm32f407", "rt"] }
-    
-    # HAL (Hardware Abstraction Layer)
-    # stm32f4xx-hal = { version = "0.8.3", features = ['stm32f407'] }
-    ```
 
 - Make sure your `.cargo/config` has the settings below:
 
@@ -913,11 +890,11 @@ So what information we got here?
     
     use cortex_m::asm::delay;
     use cortex_m_rt::entry;
-    use cortex_m_semihosting::hprintln;
-    use panic_semihosting as _;
     
-    // Set to `false` when u don't need that anymore
-    const ENABLE_DEBUG: bool = true;
+    #[cfg(feature = "enable-debug")]
+    use cortex_m_semihosting::hprintln;
+    
+    use panic_semihosting as _;
     
     // As we don't use `PAC` and `HAL` in this example, and we didn't touch the `Clock` and
     // `Interrupt` yet. That's why we use a dumb version `delay` at this moment. It's not
@@ -928,9 +905,8 @@ So what information we got here?
     
     #[entry]
     fn main() -> ! {
-        if ENABLE_DEBUG {
-            let _ = hprintln!("STM32F4 GPIO Register Led demo is running >>>>>");
-        }
+        #[cfg(feature = "enable-debug")]
+        let _ = hprintln!("STM32F4 GPIO Register Led demo is running >>>>>");
     
         // Below is the very important step:
         //
@@ -973,7 +949,8 @@ So what information we got here?
             // 0b01010101000000000000000000000000
             //
             // From right to left is bit0 ~ bit31, only bit24, bit26, bit 28, bit30 set to `1`.
-            // let _ = hprintln!("GPIOD_MODER: {:#034b}", *gpiod_moder_ptr);
+            #[cfg(feature = "enable-debug")]
+            let _ = hprintln!("GPIOD_MODER: {:#034b}", *gpiod_moder_ptr);
         }
     
         // GPIO port output type register (GPIOx_OTYPER) address, `reference manual` (page 281).
@@ -994,7 +971,9 @@ So what information we got here?
             *gpiod_bsrr_mut_ptr = (1 << 12) | (1 << 13) | (1 << 14) | (1 << 15);
         }
     
+        #[cfg(feature = "enable-debug")]
         let _ = hprintln!("\nDelay 1s......\n");
+    
         dumb_delay(10000);
     
         unsafe {
@@ -1011,9 +990,11 @@ So what information we got here?
 
 - How to run
 
+    we don't need `PAL` or `HAL` crate anymore, as we will use low-level implementation:
+
     ```rust
     # cd demo
-    cargo watch -c --exec 'run --bin gpio_led_by_register'
+    cargo watch -c --exec 'run --bin gpio_led_by_register --features "enable-debug"'
     ```
     Every time you save `demo/src/bin/gpio_led_by_register.rs`, `cargo run --bin gpio_led_by_register` will run again.
 
