@@ -1,7 +1,7 @@
 // RCC (Reset and Clock Control), page 65
 pub const RCC_REGISTER: u32 = 0x4002_3800;
-pub const RCC_AHB1ENR_REGISTER: u32 = RCC_REGISTER + 0x30; // page 242, 243
-pub const RCC_AHB1LPENR_REGISTER: u32 = RCC_REGISTER + 0x50; // Low power (sleep) mode, page 250, 252,
+// pub const RCC_AHB1ENR_REGISTER: u32 = RCC_REGISTER + 0x30; // page 242, 243
+// pub const RCC_AHB1LPENR_REGISTER: u32 = RCC_REGISTER + 0x50; // Low power (sleep) mode, page 250, 252,
 
 // ------ RCC clock control register (RCC_CR), page 224 -------
 pub const RCC_CR_HSI_IS_ON: u32 = 1u32;

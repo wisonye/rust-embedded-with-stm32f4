@@ -11,30 +11,30 @@ pub struct ClockUtils {}
 impl ClockUtils {
     /// Read u32 value from RCC control register (RCC_CR) and print the clock info.
     #[cfg(feature = "enable-debug")]
-    pub fn print_system_clock() {
-        let RCC_REGISTER_PTR = RCC_REGISTER as *const u32;
-        let RCC_REGISTER_VALUE = unsafe { ptr::read_volatile(RCC_REGISTER_PTR) };
+    pub fn print_system_clock_info() {
+        let rcc_register_ptr = RCC_REGISTER as *const u32;
+        let rcc_register_value = unsafe { ptr::read_volatile(rcc_register_ptr) };
 
-        let hsi_is_on = (RCC_REGISTER_VALUE & RCC_CR_HSI_IS_ON) == RCC_CR_HSI_IS_ON;
-        let hsi_is_stable = (RCC_REGISTER_VALUE & RCC_CR_HSI_IS_STABLE) == RCC_CR_HSI_IS_STABLE;
-        let hse_is_on = (RCC_REGISTER_VALUE & RCC_CR_HSE_IS_ON) == RCC_CR_HSE_IS_ON;
-        let hse_is_stable = (RCC_REGISTER_VALUE & RCC_CR_HSE_IS_STABLE) == RCC_CR_HSE_IS_STABLE;
-        let hse_bypass = (RCC_REGISTER_VALUE & RCC_CR_HSE_BYPASS) == RCC_CR_HSE_BYPASS;
+        let hsi_is_on = (rcc_register_value & RCC_CR_HSI_IS_ON) == RCC_CR_HSI_IS_ON;
+        let hsi_is_stable = (rcc_register_value & RCC_CR_HSI_IS_STABLE) == RCC_CR_HSI_IS_STABLE;
+        let hse_is_on = (rcc_register_value & RCC_CR_HSE_IS_ON) == RCC_CR_HSE_IS_ON;
+        let hse_is_stable = (rcc_register_value & RCC_CR_HSE_IS_STABLE) == RCC_CR_HSE_IS_STABLE;
+        let hse_bypass = (rcc_register_value & RCC_CR_HSE_BYPASS) == RCC_CR_HSE_BYPASS;
         let clock_security_is_on =
-            (RCC_REGISTER_VALUE & RCC_CR_CLOCK_SECURITY_IS_ON) == RCC_CR_CLOCK_SECURITY_IS_ON;
-        let main_pll_is_on = (RCC_REGISTER_VALUE & RCC_CR_MAIN_PLL_IS_ON) == RCC_CR_MAIN_PLL_IS_ON;
+            (rcc_register_value & RCC_CR_CLOCK_SECURITY_IS_ON) == RCC_CR_CLOCK_SECURITY_IS_ON;
+        let main_pll_is_on = (rcc_register_value & RCC_CR_MAIN_PLL_IS_ON) == RCC_CR_MAIN_PLL_IS_ON;
         let main_pll_is_ready =
-            (RCC_REGISTER_VALUE & RCC_CR_MAIN_PLL_IS_READY) == RCC_CR_MAIN_PLL_IS_READY;
-        let pll_i2s_is_on = (RCC_REGISTER_VALUE & RCC_CR_PLLI2S_IS_ON) == RCC_CR_PLLI2S_IS_ON;
+            (rcc_register_value & RCC_CR_MAIN_PLL_IS_READY) == RCC_CR_MAIN_PLL_IS_READY;
+        let pll_i2s_is_on = (rcc_register_value & RCC_CR_PLLI2S_IS_ON) == RCC_CR_PLLI2S_IS_ON;
         let pll_i2s_is_ready =
-            (RCC_REGISTER_VALUE & RCC_CR_PLLI2S_IS_READY) == RCC_CR_PLLI2S_IS_READY;
+            (rcc_register_value & RCC_CR_PLLI2S_IS_READY) == RCC_CR_PLLI2S_IS_READY;
 
         let rcc_register_printing_header = "\n[ RCC_REGISTER ]: \n";
 
-        hprintln!(
+        let _ = hprintln!(
             "{}{}{}{}{}{}{}{}{}{}{}{}",
             rcc_register_printing_header,
-            format_args!("value: {:034b}", RCC_REGISTER_VALUE),
+            format_args!("value: {:034b}", rcc_register_value),
             format_args!("\nHigh speed internal (HSI) clock enable: {}", &hsi_is_on),
             format_args!(
                 "\nHigh speed internal (HSI) clock stable: {}",

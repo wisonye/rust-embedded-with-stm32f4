@@ -19,67 +19,67 @@ pub struct RccPllConfigurationRegister {}
 
 ///
 impl RccPllConfigurationRegister {
-    pub fn get_pll_m_value() -> Result<u32, RccPllConfigurationError> {
-        let read_ptr = RCC_PLLCFGR as *const u32;
-        let temp_value = unsafe { ptr::read_volatile(read_ptr) & RCC_PLLCFGR_PLL_M_BITS };
-
-        if temp_value >= 2 && temp_value <= 63 {
-            Ok(temp_value)
-        } else {
-            Err(RccPllConfigurationError::WrongPllMConfiguration(
-                temp_value as u16,
-            ))
-        }
-    }
-
-    pub fn get_pll_n_value() -> Result<u32, RccPllConfigurationError> {
-        let read_ptr = RCC_PLLCFGR as *const u32;
-        let temp_value = unsafe {
-            (ptr::read_volatile(read_ptr) & RCC_PLLCFGR_PLL_N_BITS) >> RCC_PLLCFGR_PLL_N_START_BIT
-        };
-        if temp_value >= 50 && temp_value <= 432 {
-            Ok(temp_value)
-        } else {
-            Err(RccPllConfigurationError::WrongPllNConfiguration(
-                temp_value as u16,
-            ))
-        }
-    }
-
-    pub fn get_pll_p_value() -> Result<u32, RccPllConfigurationError> {
-        let read_ptr = RCC_PLLCFGR as *const u32;
-        let temp_value = unsafe {
-            (ptr::read_volatile(read_ptr) & RCC_PLLCFGR_PLL_P_BITS) >> RCC_PLLCFGR_PLL_P_START_BIT
-        };
-        if temp_value == 2 || temp_value == 4 || temp_value == 6 || temp_value == 8 {
-            Ok(temp_value)
-        } else {
-            Err(RccPllConfigurationError::WrongPllPConfiguration(
-                temp_value as u16,
-            ))
-        }
-    }
-
-    pub fn get_pll_q_value() -> Result<u32, RccPllConfigurationError> {
-        let read_ptr = RCC_PLLCFGR as *const u32;
-        let temp_value = unsafe {
-            (ptr::read_volatile(read_ptr) & RCC_PLLCFGR_PLL_Q_BITS) >> RCC_PLLCFGR_PLL_Q_START_BIT
-        };
-        if temp_value >= 2 && temp_value <= 15 {
-            Ok(temp_value)
-        } else {
-            Err(RccPllConfigurationError::WrongPllQConfiguration(
-                temp_value as u16,
-            ))
-        }
-    }
-
-    pub fn is_hse_as_pll_src() -> bool {
-        let read_ptr = RCC_PLLCFGR as *const u32;
-        unsafe {
-            ptr::read_volatile(read_ptr) & RCC_PLLCFGR_PLL_SRC_IS_HSE == RCC_PLLCFGR_PLL_SRC_IS_HSE
-        }
-    }
+    // pub fn get_pll_m_value() -> Result<u32, RccPllConfigurationError> {
+    // let read_ptr = RCC_PLLCFGR as *const u32;
+    // let temp_value = unsafe { ptr::read_volatile(read_ptr) & RCC_PLLCFGR_PLL_M_BITS };
+    //
+    // if temp_value >= 2 && temp_value <= 63 {
+    // Ok(temp_value)
+    // } else {
+    // Err(RccPllConfigurationError::WrongPllMConfiguration(
+    // temp_value as u16,
+    // ))
+    // }
+    // }
+    //
+    // pub fn get_pll_n_value() -> Result<u32, RccPllConfigurationError> {
+    // let read_ptr = RCC_PLLCFGR as *const u32;
+    // let temp_value = unsafe {
+    // (ptr::read_volatile(read_ptr) & RCC_PLLCFGR_PLL_N_BITS) >> RCC_PLLCFGR_PLL_N_START_BIT
+    // };
+    // if temp_value >= 50 && temp_value <= 432 {
+    // Ok(temp_value)
+    // } else {
+    // Err(RccPllConfigurationError::WrongPllNConfiguration(
+    // temp_value as u16,
+    // ))
+    // }
+    // }
+    //
+    // pub fn get_pll_p_value() -> Result<u32, RccPllConfigurationError> {
+    // let read_ptr = RCC_PLLCFGR as *const u32;
+    // let temp_value = unsafe {
+    // (ptr::read_volatile(read_ptr) & RCC_PLLCFGR_PLL_P_BITS) >> RCC_PLLCFGR_PLL_P_START_BIT
+    // };
+    // if temp_value == 2 || temp_value == 4 || temp_value == 6 || temp_value == 8 {
+    // Ok(temp_value)
+    // } else {
+    // Err(RccPllConfigurationError::WrongPllPConfiguration(
+    // temp_value as u16,
+    // ))
+    // }
+    // }
+    //
+    // pub fn get_pll_q_value() -> Result<u32, RccPllConfigurationError> {
+    // let read_ptr = RCC_PLLCFGR as *const u32;
+    // let temp_value = unsafe {
+    // (ptr::read_volatile(read_ptr) & RCC_PLLCFGR_PLL_Q_BITS) >> RCC_PLLCFGR_PLL_Q_START_BIT
+    // };
+    // if temp_value >= 2 && temp_value <= 15 {
+    // Ok(temp_value)
+    // } else {
+    // Err(RccPllConfigurationError::WrongPllQConfiguration(
+    // temp_value as u16,
+    // ))
+    // }
+    // }
+    //
+    // pub fn is_hse_as_pll_src() -> bool {
+    // let read_ptr = RCC_PLLCFGR as *const u32;
+    // unsafe {
+    // ptr::read_volatile(read_ptr) & RCC_PLLCFGR_PLL_SRC_IS_HSE == RCC_PLLCFGR_PLL_SRC_IS_HSE
+    // }
+    // }
 
     #[cfg(feature = "enable-debug")]
     pub fn print_config() {
@@ -87,7 +87,7 @@ impl RccPllConfigurationRegister {
         let cfg_register_value = unsafe { ptr::read_volatile(read_ptr) };
 
         let temp_m_value = cfg_register_value & RCC_PLLCFGR_PLL_M_BITS;
-        hprintln!("\ntemp_m_value: {:#018b}", temp_m_value);
+        let _ = hprintln!("\ntemp_m_value: {:#018b}", temp_m_value);
         let pll_m_value = if temp_m_value >= 2 && temp_m_value <= 63 {
             Ok(temp_m_value)
         } else {
@@ -98,7 +98,7 @@ impl RccPllConfigurationRegister {
 
         let temp_n_value =
             (cfg_register_value & RCC_PLLCFGR_PLL_N_BITS) >> RCC_PLLCFGR_PLL_N_START_BIT;
-        hprintln!("temp_n_value: {:#018b}", temp_n_value);
+        let _ = hprintln!("temp_n_value: {:#018b}", temp_n_value);
         let pll_n_value = if temp_n_value >= 50 && temp_n_value <= 432 {
             Ok(temp_n_value)
         } else {
@@ -109,7 +109,7 @@ impl RccPllConfigurationRegister {
 
         let temp_p_value =
             (cfg_register_value & RCC_PLLCFGR_PLL_P_BITS) >> RCC_PLLCFGR_PLL_P_START_BIT;
-        hprintln!("temp_p_value: {:#018b}", temp_p_value);
+        let _ = hprintln!("temp_p_value: {:#018b}", temp_p_value);
         let pll_p_value =
             if temp_p_value == 2 || temp_p_value == 4 || temp_p_value == 6 || temp_p_value == 8 {
                 Ok(temp_p_value)
@@ -121,7 +121,7 @@ impl RccPllConfigurationRegister {
 
         let temp_q_value =
             (cfg_register_value & RCC_PLLCFGR_PLL_Q_BITS) >> RCC_PLLCFGR_PLL_Q_START_BIT;
-        hprintln!("temp_q_value: {:#018b}", temp_q_value);
+        let _ = hprintln!("temp_q_value: {:#018b}", temp_q_value);
         let pll_q_value = if temp_q_value >= 2 && temp_q_value <= 15 {
             Ok(temp_q_value)
         } else {
@@ -135,7 +135,7 @@ impl RccPllConfigurationRegister {
         let pll_source_desc = if pll_source { "HSE" } else { "HSI" };
 
         let printing_header = "\n[ RCC PLL configuration register (RCC_PLLCFGR) ]: \n";
-        hprintln!(
+        let _ = hprintln!(
             "{}{}{}{}{}{}{}",
             printing_header,
             format_args!("RCC_PLLCFGR value: {:#034b}", cfg_register_value),
