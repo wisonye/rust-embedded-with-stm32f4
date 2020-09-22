@@ -1,9 +1,7 @@
-use crate::constants::{
-    RCC_CR_CLOCK_SECURITY_IS_ON, RCC_CR_HSE_BYPASS, RCC_CR_HSE_IS_ON, RCC_CR_HSE_IS_STABLE,
-    RCC_CR_HSI_IS_ON, RCC_CR_HSI_IS_STABLE, RCC_CR_MAIN_PLL_IS_ON, RCC_CR_MAIN_PLL_IS_READY,
-    RCC_CR_PLLI2S_IS_ON, RCC_CR_PLLI2S_IS_READY, RCC_REGISTER,
-};
+use crate::constants::*;
 use core::ptr;
+
+#[cfg(feature = "enable-debug")]
 use cortex_m_semihosting::hprintln;
 
 ///
@@ -12,11 +10,8 @@ pub struct ClockUtils {}
 ///
 impl ClockUtils {
     /// Read u32 value from RCC control register (RCC_CR) and print the clock info.
-    pub fn print_system_clock(enable_debug: bool) {
-        if !enable_debug {
-            return;
-        }
-
+    #[cfg(feature = "enable-debug")]
+    pub fn print_system_clock() {
         let RCC_REGISTER_PTR = RCC_REGISTER as *const u32;
         let RCC_REGISTER_VALUE = unsafe { ptr::read_volatile(RCC_REGISTER_PTR) };
 
