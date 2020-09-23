@@ -3,11 +3,11 @@
 
 use cortex_m::asm::delay;
 use cortex_m_rt::entry;
-use cortex_m_semihosting::hprintln;
-use panic_semihosting as _;
 
-// Set to `false` when u don't need that anymore
-const ENABLE_DEBUG: bool = true;
+#[cfg(feature = "enable-debug")]
+use cortex_m_semihosting::hprintln;
+
+use panic_semihosting as _;
 
 // As we don't use `PAC` and `HAL` in this example, and we didn't touch the `Clock` and
 // `Interrupt` yet. That's why we use a dumb version `delay` at this moment. It's not
@@ -18,9 +18,8 @@ fn dumb_delay(millisecond: u32) {
 
 #[entry]
 fn main() -> ! {
-    if ENABLE_DEBUG {
-        let _ = hprintln!("STM32F4 GPIO Register Led demo is running >>>>>");
-    }
+    #[cfg(feature = "enable-debug")]
+    let _ = hprintln!("STM32F4 GPIO Register Led demo is running >>>>>");
 
     // Below is the very important step:
     //
@@ -63,6 +62,7 @@ fn main() -> ! {
         // 0b01010101000000000000000000000000
         //
         // From right to left is bit0 ~ bit31, only bit24, bit26, bit 28, bit30 set to `1`.
+        #[cfg(feature = "enable-debug")]
         let _ = hprintln!("GPIOD_MODER: {:#034b}", *gpiod_moder_ptr);
     }
 
@@ -84,7 +84,9 @@ fn main() -> ! {
         *gpiod_bsrr_mut_ptr = (1 << 12) | (1 << 13) | (1 << 14) | (1 << 15);
     }
 
+    #[cfg(feature = "enable-debug")]
     let _ = hprintln!("\nDelay 1s......\n");
+
     dumb_delay(10000);
 
     unsafe {

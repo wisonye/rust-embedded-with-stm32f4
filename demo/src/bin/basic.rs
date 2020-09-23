@@ -12,15 +12,13 @@ use cortex_m_rt::entry;
 // `cortex_m_semihosting` gives us the ability to print the debug info
 // into the host console. But keep in mind that, each write operation
 // is super slow which takes several milliseconds depends on the
-// hardware!!! Better to use the config to enable the call or not.
+// hardware!!! That's why we make it as an option feature.
+#[cfg(feature = "enable-debug")]
 use cortex_m_semihosting::{dbg, hprintln};
 
 // `panic_semihosting` will call `debug::EXIT_FAILURE` after logging the
 // panic message.
 use panic_semihosting as _;
-
-// Set to `false` when u don't need that anymore
-const ENABLE_DEBUG: bool = true;
 
 // We will use the `entry` attribute from the `cortex_m_rt` crate to define
 // the entry point. The entry point function must have signature `fn() -> !;`
@@ -28,9 +26,8 @@ const ENABLE_DEBUG: bool = true;
 #[entry]
 fn main() -> ! {
     // `hprintln` returns `Result<(),()>`
-    if ENABLE_DEBUG {
-        let _ = hprintln!("Basic STM32F4 demo is running >>>>>");
-    }
+    #[cfg(feature = "enable-debug")]
+    let _ = hprintln!("Basic STM32F4 demo is running >>>>>");
 
     // Get the singleton `Peripherals` instance. This method can only
     // successfully called **once()**, that's why return an `Option`.
@@ -41,7 +38,8 @@ fn main() -> ! {
     // dbg!(peripherals);
 
     let x = 10;
-    if ENABLE_DEBUG {
+    #[cfg(feature = "enable-debug")]
+    {
         hprintln!("x is {}", x);
         dbg!(x);
     }

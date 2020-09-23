@@ -1,33 +1,36 @@
+#![allow(warnings)]
 #![no_std]
 #![no_main]
 
 use cortex_m_rt::entry;
+
+#[cfg(feature = "enable-debug")]
 use cortex_m_semihosting::hprintln;
+
 use panic_semihosting as _;
 
+#[cfg(feature = "enable-hal")]
 use crate::hal::{prelude::*, stm32};
 
 // This is very important!!!
+#[cfg(feature = "enable-hal")]
 use stm32f4xx_hal as hal;
 
 // Import from `stm32f4xx_hal`
+#[cfg(feature = "enable-hal")]
 use hal::{
     delay::Delay,
     gpio::{
         gpiod::{Parts, PD12, PD13, PD14, PD15},
         Output, PushPull,
     },
-    rcc::{Clocks, Rcc}, // Constrained RCC peripheral
+    rcc::Rcc, // Constrained RCC peripheral
 };
-
-// Set to `false` when u don't need that anymore
-const ENABLE_DEBUG: bool = true;
 
 #[entry]
 fn main() -> ! {
-    if ENABLE_DEBUG {
-        let _ = hprintln!("STM32F4 GPIO Led demo is running >>>>>");
-    }
+    #[cfg(feature = "enable-debug")]
+    let _ = hprintln!("STM32F4 GPIO Led demo is running >>>>>");
 
     let stm32407_peripherals = stm32::Peripherals::take().unwrap();
     let cortex_m_peripherals = cortex_m::peripheral::Peripherals::take().unwrap();
