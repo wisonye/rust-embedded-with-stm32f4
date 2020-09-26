@@ -1,0 +1,20 @@
+[book]
+authors = ["Wison Ye"]
+language = "en"
+multilingual = false
+src = "src"
+title = "All-in-one Rust Embedded Programming for STM32F4 series"
+edition = "edition2018"
+
+[output.html]
+theme = "ayu"
+default-theme = "ayu"
+preferred-dark-theme = "navy"
+curly-quotes = true
+mathjax-support = false
+copy-fonts = true
+# additional-css = ["custom.css", "custom2.css"]
+# additional-js = ["custom.js"]
+no-section-label = false
+git-repository-url = "https://github.com/wisonye/rust-embedded-with-stm32f4"
+git-repository-icon = "fa-github"
