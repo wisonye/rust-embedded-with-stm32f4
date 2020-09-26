@@ -30,5 +30,11 @@ And we pick the `ARM-based MCU STM32F4` series chips as our target to run all th
 
     It will build the book into `tutorial/book` folder and open it your browser.
 
+    How do I export the book into **PDF** format?
+
+    Thta's pretty easy, in the browser, click on the `print` icon on the right-top to save as **PDF**:
+
+    ![how-to-save-to-pdf.png](./how-to-save-to-pdf.png)
+
 - Or you can open the PDF version [here](./all-in-one_rust_embedded_programming_for_stm32f4_series.pdf)
 
