@@ -1,4 +1,4 @@
-## <a name="how-to-choose-which-crate-to-start">4. How to choose which crate (rust's library) to start</a>
+## <a name="how-to-choose-which-crate-to-start">4. Write the first example</a>
 
 ![How to choose which crate to start](../images/how-to-choice-which-crate.png)
 

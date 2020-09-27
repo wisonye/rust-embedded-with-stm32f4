@@ -1,4 +1,4 @@
-#### <a name="what-is-mcu">1.1 What is `MCU` and `Soc`? What makes it different than `SBC`?</a>
+#### <a name="what-is-mcu">1.1 What is `MCU`, `Soc` and `SBC`?</a>
 
 - `MCU` stands for `Microcontroller Unit`.
 - `Soc` stands for `System-on-chip`.

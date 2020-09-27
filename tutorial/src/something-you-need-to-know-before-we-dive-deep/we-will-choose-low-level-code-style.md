@@ -1,4 +1,6 @@
-### <a name="we-will-choose-low-level-code-style">5.7 For the rest of the chapters, we pick the low-level (pure register controlling) code style for all demos, why?</a>
+### <a name="we-will-choose-low-level-code-style">5.7 Why we pick low-level</a>
+
+_**For the rest of the chapters, we pick the low-level (pure register controlling) code style for all demos, why?**_
 
 No matter what knowledge we’re learning, usually 2 steps we can follow:
 

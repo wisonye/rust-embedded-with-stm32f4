@@ -4,7 +4,7 @@ First thing first, there are a few kinds of `Clocks` in the [`reference manual`]
 
 - **HSE**
 
-    High-Speed External clock signal, usually, it's external onboard oscillator hardware with the fixed working frequency. Make sure you check the hardware datasheet before setting `HSE` value (unit in Hertz).
+    High-Speed External clock signal, usually, it's external onboard oscillator hardware with the fixed frequency. Make sure you check the hardware datasheet before setting `HSE` value (unit in **Hertz**).
 
 - **HSI**
     
@@ -15,52 +15,52 @@ First thing first, there are a few kinds of `Clocks` in the [`reference manual`]
     This stuff is complicated, as it stands for **Phase-Locked Loop**. It sounds scary for you, as you have no idea what that means. Briefly, it takes the input frequency and uses different factor settings to change the output frequency.
 
 
-So, let's have a close look at the `clock source selecting`:
+So, let's have a close look at the `Clock source selecting`:
 
-We can pick one of the path below to as the clock source and
-calculate the `SYSCLK` working frequency:
+We can pick one of the paths below as the clock source and
+calculate the `SYSCLK` frequency:
 
-- **HSI** ------------------------------------------------------> **SYSCLK**
-- **HSE** -----------------------------------------------------> **SYSCLK**
-- **PLL** ----> (HSI or HSE) / PLL_M * PLL_N / PLL_P ---> **SYSCLK**
+- **`HSI`** ----> **`SYSCLK`**
+- **`HSE`** ----> **`SYSCLK`**
+- **`PLL`** ----> (HSI or HSE) / PLL_M * PLL_N / PLL_P ---> **`SYSCLK`**
 
 As you can see, it's not that hard:) 
 
-When the expected working frequency is higher than `HSI` or `HSE` can offer, then you have to use `PLL` as clock source!!!
+When the expected frequency is higher than `HSI` or `HSE` can offer, then you have to use `PLL` as clock source!!!
 
 Let's have a look at them one by one:
 
-- **HSI --> SYSCLK**:
+- **`HSI` --> `SYSCLK`**:
 
     ![hsi-as-clock-source.png](../../images/hsi-as-clock-source.png)
 
-    This is the case of **HSI** as the clock source. You can see the **SYSCLK** get clock signal directly from **HSI** and the final working frequency is **16MHz**.
+    This is the case of **`HSI`** as the clock source. You can see the **`SYSCLK`** get clock signal directly from **`HSI`** and the final frequency is **16MHz**.
 
-- **HSE --> SYSCLK**:
+- **`HSE` --> `SYSCLK`**:
 
     ![hse-bypass-as-clock-source.png](../../images/hse-bypass-as-clock-source.png)
 
-    This is the case of **HSE** as the clock source, also call `HSE bypass mode` (as not go through **PLL**). You can see the **SYSCLK** get clock signal directly from `HSE` and the final working frequency is **25MHz** (equal to **HSE** offered frequency).
+    This is the case of **`HSE`** as the clock source, also call `HSE bypass mode` (as not go through **`PLL`**). You can see the **`SYSCLK`** get clock signal directly from `HSE` and the final frequency is **25MHz** (equal to **`HSE`** offered frequency).
 
-- **PLL** ----> (HSI or HSE) / PLL_M * PLL_N / PLL_P ---> **SYSCLK**:
+- **`PLL`** ----> (HSI or HSE) / PLL_M * PLL_N / PLL_P ---> **`SYSCLK`**:
 
     ![hse-pll-as-clock-source.png](../../images/hse-pll-as-clock-source.png)
 
-    This is the case of **HSE through PLL** as the clock source. You can see the **SYSCLK** get clock signal from `HSE` first, and then go through **PLL** factors (**M/N/P**) calculation, finally, got the working frequency is **168MHz**.
+    This is the case of **`HSE through PLL`** as the clock source. You can see the **`SYSCLK`** get clock signal from **`HSE`** first, and then go through **`PLL`** factors (**M/N/P**) calculation, finally, got the frequency is **168MHz**.
 
-    For the **PLL_M/N/P**, usually, you don't need to worry about, as `STMCubeMX` will figure out the combination for you when you change the expected frequency in **HCLK**. But you can change it by youself.
+    For the **PLL_M/N/P**, usually, you don't need to worry about, as `STMCubeMX` will figure out the combination for you when you change the expected frequency in **`HCLK`**. But you can change it by yourself.
 
-    For example, when I change the **HCLK** frequency to **100MHz** like below, `STMCubeMX` calculates the combination for me:
+    For example, when I change the **`HCLK`** frequency to **100MHz** like below, `STMCubeMX` calculates the combination for me:
 
     ![pll-combination-2.png](../../images/pll-combination-2.png)
 
-    But I can change it like below and got the same result:
+    But I can change the combination like below and got the same result:
 
     ![pll-combination-1.png](../../images/pll-combination-1.png)
 
-    Here are the rules if you want to change that combination by youself:
+    Here are the rules if you want to change the combination by yourself:
 
-    - When using **PLL** as clock source, we should calculate **SYSCLK** working frequency with the following formula:
+    - When using **`PLL`** as clock source, we should calculate **`SYSCLK`** frequency with the following formula:
 
         ```
         PLL_VCO = (HSE_FREQUENCY or HSI_FREQUENCY / PLL_M) * PLL_N
@@ -76,11 +76,11 @@ Let's have a look at them one by one:
 
             `(HSE_FREQUENCY or HSI_FREQUENCY / PLL_M)` always return `1`
 
-            which more easy to to do the rest calculating. 
+            which easier to do the rest calculation.
             
         - `PLL_P`: We can try start from `2`, then `PLL_M` and `PLL_P`
-          already fixed, only left the `PLL_N` to choose.
+          already fixed, only left the `PLL_N` to try.
 
-        But keep in mind that `PLL_M/N/P` have to in the allowed range provided in the reference manual (page 227). 
+        But keep in mind that `PLL_M/N/P` value must in the range provided in the reference manual (page 227). 
 
         So the suggestion is always going to `STM32CubeMX` and use the automatic combination or change your settings in the UI, as it will tell you when your value is not working.
