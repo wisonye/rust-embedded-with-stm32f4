@@ -55,6 +55,8 @@ pub mod clock_source_selecting {
     // Use HSI --> PLL as clock source and to max frequency
     pub const HSI_FREQUENCY: u32 = 16_000_000;
     pub const AHB_PRESCALER_FOR_HSI: u32 = 1;
+    pub const APB1_PRESCALER_FOR_HSI: u32 = 4;
+    pub const APB2_PRESCALER_FOR_HSI: u32 = 2;
     pub const PLL_M_PRESCALER_FOR_HSI: u32 = 16; // 2 ≤PLLM ≤63
     pub const PLL_N_PRESCALER_FOR_HSI: u32 = 336; // 50 ≤PLLN ≤432
     pub const PLL_P_PRESCALER_FOR_HSI: u32 = 2; // PLLP = 2, 4, 6, or 8
@@ -63,6 +65,8 @@ pub mod clock_source_selecting {
     // Use HSE --> PLL as clock source and to max frequency
     pub const HSE_FREQUENCY: u32 = 8_000_000;
     pub const AHB_PRESCALER_FOR_HSE: u32 = 1;
+    pub const APB1_PRESCALER_FOR_HSE: u32 = 4;
+    pub const APB2_PRESCALER_FOR_HSE: u32 = 2;
     pub const PLL_M_PRESCALER_FOR_HSE: u32 = 8; // 2 ≤PLLM ≤63
     pub const PLL_N_PRESCALER_FOR_HSE: u32 = 336; // 50 ≤PLLN ≤432
     pub const PLL_P_PRESCALER_FOR_HSE: u32 = 2; // PLLP = 2, 4, 6, or 8
@@ -76,6 +80,8 @@ pub mod clock_source_selecting {
     // Use HSI --> PLL as clock source and to max frequency
     pub const HSI_FREQUENCY: u32 = 16_000_000;
     pub const AHB_PRESCALER_FOR_HSI: u32 = 1;
+    pub const APB1_PRESCALER_FOR_HSI: u32 = 2;
+    pub const APB2_PRESCALER_FOR_HSI: u32 = 1;
     pub const PLL_M_PRESCALER_FOR_HSI: u32 = 16; // 2 ≤PLLM ≤63
     pub const PLL_N_PRESCALER_FOR_HSI: u32 = 200; // 50 ≤PLLN ≤432
     pub const PLL_P_PRESCALER_FOR_HSI: u32 = 2; // PLLP = 2, 4, 6, or 8
@@ -84,6 +90,8 @@ pub mod clock_source_selecting {
     // Use HSE --> PLL as clock source and to max frequency
     pub const HSE_FREQUENCY: u32 = 25_000_000;
     pub const AHB_PRESCALER_FOR_HSE: u32 = 1;
+    pub const APB1_PRESCALER_FOR_HSE: u32 = 2;
+    pub const APB2_PRESCALER_FOR_HSE: u32 = 1;
     pub const PLL_M_PRESCALER_FOR_HSE: u32 = 25; // 2 ≤PLLM ≤63
     pub const PLL_N_PRESCALER_FOR_HSE: u32 = 200; // 50 ≤PLLN ≤432
     pub const PLL_P_PRESCALER_FOR_HSE: u32 = 2; // PLLP = 2, 4, 6, or 8

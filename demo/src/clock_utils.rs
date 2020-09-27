@@ -1,10 +1,9 @@
 use crate::clock_frequency::MegaHertz;
-use crate::rcc_clock_settings::clock_source_selecting;
-use crate::rcc_clock_config_register::RccClockConfigurationRegister;
+use crate::rcc_clock_config_register::{RccClockConfigurationRegister, RccSystemClockSwtich};
 use crate::rcc_clock_control_register::RccClockControlRegister;
+use crate::rcc_clock_settings::clock_source_selecting;
 use crate::rcc_pll_config_register::RccPllConfigurationRegister;
 use core::fmt::Write;
-use core::ptr;
 
 #[cfg(feature = "enable-debug")]
 use cortex_m_semihosting::hprintln;
@@ -13,7 +12,7 @@ use cortex_m_semihosting::hprintln;
 use heapless::{consts::*, String};
 
 ///
-#[derive(Debug)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum ClockSource {
     Hsi,
     HsiThroughPll,
@@ -90,20 +89,16 @@ impl RccClocks {
 
     /// Reset all rcc registers
     fn init_rcc_clock() {
-        unsafe {
-            
-        }
+        RccClockControlRegister::reset();
     }
 
-    /// Setup system clock
-    pub fn setup_system_clock(clock_source: ClockSource) -> RccClocks {
-        Self::init_rcc_clock();
-
+    /// Create `RccClocks` instance
+    fn create_rcc_clocks(clock_source: &ClockSource) -> RccClocks {
         let rcc_clock = match clock_source {
             ClockSource::Hsi => RccClocks {
                 hsi: Some(clock_source_selecting::HSI_FREQUENCY.into()),
                 hse: Some(clock_source_selecting::HSE_FREQUENCY.into()),
-                clock_source,
+                clock_source: (*clock_source).clone(),
                 system_clock: Some(clock_source_selecting::HSI_FREQUENCY.into()),
                 hardware_cpu_clock: Some(clock_source_selecting::HSI_FREQUENCY.into()),
                 ahb_prescaler: None,
@@ -128,7 +123,7 @@ impl RccClocks {
                 RccClocks {
                     hsi: Some(clock_source_selecting::HSI_FREQUENCY.into()),
                     hse: Some(clock_source_selecting::HSE_FREQUENCY.into()),
-                    clock_source,
+                    clock_source: (*clock_source).clone(),
                     system_clock: Some(system_clock_speed.into()),
                     hardware_cpu_clock: Some(cpu_clock_speed.into()),
                     ahb_prescaler: Some(clock_source_selecting::AHB_PRESCALER_FOR_HSI),
@@ -154,7 +149,7 @@ impl RccClocks {
                 RccClocks {
                     hsi: Some(clock_source_selecting::HSI_FREQUENCY.into()),
                     hse: Some(clock_source_selecting::HSE_FREQUENCY.into()),
-                    clock_source,
+                    clock_source: (*clock_source).clone(),
                     system_clock: Some(system_clock_speed.into()),
                     hardware_cpu_clock: Some(cpu_clock_speed.into()),
                     ahb_prescaler: Some(clock_source_selecting::AHB_PRESCALER_FOR_HSE),
@@ -171,7 +166,48 @@ impl RccClocks {
         };
 
         #[cfg(feature = "enable-debug")]
-        hprintln!("\n{:#?}", &rcc_clock);
+        let _ = hprintln!("\n{:#?}", &rcc_clock);
+
+        rcc_clock
+    }
+
+    /// Setup system clock
+    pub fn setup_system_clock(clock_source: ClockSource) -> RccClocks {
+        Self::init_rcc_clock();
+
+        let rcc_clock = Self::create_rcc_clocks(&clock_source);
+
+        // For this default option, we do nothing
+        if clock_source == ClockSource::Hsi {
+            return rcc_clock;
+        }
+
+        match clock_source {
+            ClockSource::HsiThroughPll => {
+                // 2. Set PLL factors MNPQ
+                RccPllConfigurationRegister::set_pll_mnpq(false);
+                // 3. Enable PLL and wait for it stable
+                RccClockControlRegister::enable_pll_and_wait_for_it_stable();
+                // 4. Set the AHB prescaler, APB1 prescaler, APB2 prescaler
+                RccClockConfigurationRegister::set_bus_prescaler(false);
+            }
+            ClockSource::HseThroughPll => {
+                // 1. Enable HSE and wait for it stable
+                RccClockControlRegister::enable_hse_as_clock_source_and_wait_for_it_stable();
+                // 2. Set PLL factors MNPQ
+                RccPllConfigurationRegister::set_pll_mnpq(true);
+                // 3. Enable PLL and wait for it stable
+                RccClockControlRegister::enable_pll_and_wait_for_it_stable();
+                // 4. Set the AHB prescaler, APB1 prescaler, APB2 prescaler
+                RccClockConfigurationRegister::set_bus_prescaler(true);
+            }
+            _ => {}
+        }
+
+        // 5. Switch clock source
+        RccClockConfigurationRegister::switch_clock_source_and_wait_for_stable(
+            RccSystemClockSwtich::PllSelectedAsSytemClock,
+        );
 
         rcc_clock
     }

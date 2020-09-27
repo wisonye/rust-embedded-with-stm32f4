@@ -1,5 +1,6 @@
-use core::ptr;
 use crate::rcc_clock_settings::RCC_CR;
+use core::ptr;
+use cortex_m::asm::nop;
 
 #[cfg(feature = "enable-debug")]
 use cortex_m_semihosting::hprintln;
@@ -24,6 +25,45 @@ pub type RCC_CR = RccClockControlRegister;
 
 ///
 impl RccClockControlRegister {
+    ///
+    pub fn reset() {
+        unsafe {
+            ptr::write_volatile(RCC_CR as *mut u32, 0x0000_0083);
+        }
+    }
+
+    /// Make sure call somewhere call `reset()` before calling this function!!!
+    pub fn enable_hse_as_clock_source_and_wait_for_it_stable() {
+        let rcc_cr_write_ptr = RCC_CR as *mut u32;
+        let rcc_cr_read_ptr = RCC_CR as *const u32;
+        unsafe {
+            ptr::write_volatile(rcc_cr_write_ptr, RCC_CR_HSE_IS_ON);
+
+            while (ptr::read_volatile(rcc_cr_read_ptr) & RCC_CR_HSE_IS_ON) != RCC_CR_HSE_IS_ON {
+                #[cfg(feature = "enable-debug")]
+                let _ = hprintln!("Waiting for HSE to become stable>>>>>");
+
+                nop();
+            }
+        }
+    }
+
+    /// Make sure call somewhere call `reset()` before calling this function!!!
+    pub fn enable_pll_and_wait_for_it_stable() {
+        let rcc_cr_write_ptr = RCC_CR as *mut u32;
+        let rcc_cr_read_ptr = RCC_CR as *const u32;
+        unsafe {
+            ptr::write_volatile(rcc_cr_write_ptr, RCC_CR_MAIN_PLL_IS_ON);
+
+            while (ptr::read_volatile(rcc_cr_read_ptr) & RCC_CR_MAIN_PLL_IS_READY) != RCC_CR_MAIN_PLL_IS_READY {
+                #[cfg(feature = "enable-debug")]
+                let _ = hprintln!("Waiting for Main PLL to become stable>>>>>");
+
+                nop();
+            }
+        }
+    }
+
     #[cfg(feature = "enable-debug")]
     pub fn print_config() {
         let rcc_register_ptr = RCC_CR as *const u32;

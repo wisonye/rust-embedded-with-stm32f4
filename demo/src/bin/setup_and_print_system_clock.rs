@@ -35,30 +35,30 @@ use stm32f4xx_hal as hal;
 // Import from `stm32f4xx_hal`
 use hal::rcc::{Clocks, Rcc};
 
-// #[cfg(feature = "enable-debug")]
-// fn print_clocks(clocks: &Clocks) {
-// fn get_megahertz_is_possible(frequency: u32) -> u32 {
-// if frequency > 1_000_000 {
-// frequency / 1_000_000
-// } else {
-// frequency
-// }
-// }
-//
-// let _ = hprintln!("\n[ Clocks Frequency ]:\nAHB1 Frequency: {}MHz\nAPB1 Frequency: {}MHz\nAPB2 Frequency: {}MHz\nAPB1 Prescaler: {}\nAPB2 Prescaler: {}\nSystem Core Frequency: {}Mhz\nPLL48 clock line Frequency: {}MHz\nPLL48 clock is within USB specifications: {}\n",
-// get_megahertz_is_possible(clocks.hclk().0),
-// get_megahertz_is_possible(clocks.pclk1().0),
-// get_megahertz_is_possible(clocks.pclk2().0),
-// clocks.ppre1(),
-// clocks.ppre2(),
-// get_megahertz_is_possible(clocks.sysclk().0),
-// match clocks.pll48clk() {
-// Some(value) => value.0,
-// None => 0
-// },
-// clocks.is_pll48clk_valid()
-// );
-// }
+#[cfg(feature = "enable-debug")]
+fn print_clocks(clocks: &Clocks) {
+    fn get_megahertz_is_possible(frequency: u32) -> u32 {
+        if frequency > 1_000_000 {
+            frequency / 1_000_000
+        } else {
+            frequency
+        }
+    }
+    //
+    let _ = hprintln!("\n[ Clocks Frequency ]:\nAHB1 Frequency: {}MHz\nAPB1 Frequency: {}MHz\nAPB2 Frequency: {}MHz\nAPB1 Prescaler: {}\nAPB2 Prescaler: {}\nSystem Core Frequency: {}Mhz\nPLL48 clock line Frequency: {}MHz\nPLL48 clock is within USB specifications: {}\n",
+ get_megahertz_is_possible(clocks.hclk().0),
+ get_megahertz_is_possible(clocks.pclk1().0),
+ get_megahertz_is_possible(clocks.pclk2().0),
+ clocks.ppre1(),
+ clocks.ppre2(),
+ get_megahertz_is_possible(clocks.sysclk().0),
+ match clocks.pll48clk() {
+ Some(value) => value.0,
+ None => 0
+ },
+ clocks.is_pll48clk_valid()
+ );
+}
 
 ///
 #[entry]
@@ -66,13 +66,13 @@ fn main() -> ! {
     #[cfg(feature = "enable-debug")]
     let _ = hprintln!("STM32F4 setup and print system clock demo is running >>>>>");
 
-    let stm32407_peripherals = stm32::Peripherals::take().unwrap();
+    // let stm32407_peripherals = stm32::Peripherals::take().unwrap();
     // let cortex_m_peripherals = cortex_m::peripheral::Peripherals::take().unwrap();
 
     // Set up the system clock. We want to run at 16Mhz for this one.
-    let constrained_rcc_peripheral: Rcc = stm32407_peripherals.RCC.constrain();
+    // let constrained_rcc_peripheral: Rcc = stm32407_peripherals.RCC.constrain();
     // let clocks: Clocks = constrained_rcc_peripheral.cfgr.sysclk(16.mhz()).freeze();
-    // let clocks: Clocks = constrained_rcc_peripheral.cfgr.use_hse(25.mhz()).freeze();
+    // let clocks: Clocks = constrained_rcc_peripheral.cfgr.use_hse(100.mhz()).freeze();
 
     #[cfg(feature = "enable-debug")]
     {
@@ -80,7 +80,8 @@ fn main() -> ! {
         // RccClocks::setup_system_clock(ClockSource::Hsi);
         // RccClocks::setup_system_clock(ClockSource::HsiThroughPll);
         RccClocks::setup_system_clock(ClockSource::HseThroughPll);
-        // RccClocks::print_system_clock_info();
+        //
+        RccClocks::print_system_clock_info();
     }
 
     loop {}

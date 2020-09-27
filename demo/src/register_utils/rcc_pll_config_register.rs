@@ -1,4 +1,4 @@
-use crate::rcc_clock_settings::RCC_CR;
+use crate::rcc_clock_settings::{clock_source_selecting, RCC_CR};
 use core::ptr;
 
 #[cfg(feature = "enable-debug")]
@@ -8,6 +8,7 @@ use cortex_m_semihosting::hprintln;
 pub const RCC_PLLCFGR: u32 = RCC_CR + 0x04; // page 226
 
 // bit0 ~ bit5
+pub const RCC_PLLCFGR_PLL_M_START_BIT: u8 = 0;
 pub const RCC_PLLCFGR_PLL_M_BITS: u32 = 0b111111;
 //
 // bit6 ~ bit14
@@ -41,6 +42,56 @@ pub type RCC_PLLCFGR = RccPllConfigurationRegister;
 
 ///
 impl RccPllConfigurationRegister {
+    ///
+    pub fn set_pll_mnpq(use_hse: bool) {
+        let rcc_pllcfgr_write_ptr = RCC_PLLCFGR as *mut u32;
+
+        let pll_m = if use_hse {
+            clock_source_selecting::PLL_M_PRESCALER_FOR_HSE
+        } else {
+            clock_source_selecting::PLL_M_PRESCALER_FOR_HSI
+        };
+
+        let pll_n = if use_hse {
+            clock_source_selecting::PLL_N_PRESCALER_FOR_HSE
+        } else {
+            clock_source_selecting::PLL_N_PRESCALER_FOR_HSI
+        };
+
+        let pll_p = if use_hse {
+            clock_source_selecting::PLL_P_PRESCALER_FOR_HSE
+        } else {
+            clock_source_selecting::PLL_P_PRESCALER_FOR_HSI
+        };
+
+        let pll_q = if use_hse {
+            clock_source_selecting::PLL_Q_PRESCALER_FOR_HSE
+        } else {
+            clock_source_selecting::PLL_Q_PRESCALER_FOR_HSI
+        };
+
+        let mut pll_set_bits = (pll_m << RCC_PLLCFGR_PLL_M_START_BIT)
+            | (pll_n << RCC_PLLCFGR_PLL_N_START_BIT)
+            | (pll_p << RCC_PLLCFGR_PLL_P_START_BIT)
+            | (pll_q << RCC_PLLCFGR_PLL_Q_START_BIT);
+
+        if use_hse {
+            pll_set_bits |= RCC_PLLCFGR_PLL_SRC_IS_HSE
+        }
+
+        #[cfg(feature = "enable-debug")]
+        {
+            let _ = hprintln!("pll_m: {}", pll_m);
+            let _ = hprintln!("pll_n: {}", pll_n);
+            let _ = hprintln!("pll_p: {}", pll_p);
+            let _ = hprintln!("pll_q: {}", pll_q);
+        }
+
+        unsafe {
+            ptr::write_volatile(rcc_pllcfgr_write_ptr, pll_set_bits);
+        }
+    }
+
     // pub fn get_pll_m_value() -> Result<u32, RccPllConfigurationError> {
     // let read_ptr = RCC_PLLCFGR as *const u32;
     // let temp_value = unsafe { ptr::read_volatile(read_ptr) & RCC_PLLCFGR_PLL_M_BITS };
