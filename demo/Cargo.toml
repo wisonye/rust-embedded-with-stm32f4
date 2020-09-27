@@ -7,9 +7,11 @@ version = "0.1.0"
 
 [features]
 default = []
-enable-debug = ["cortex-m-semihosting"]
+enable-debug = ["cortex-m-semihosting", "heapless"]
 enable-pac = ["stm32f4"]
 enable-hal = ["stm32f4xx-hal"]
+use-weact-black-pill = []
+use-stm32f407g-disc1 = []
 
 [dependencies]
 cortex-m = "0.6.0"
@@ -27,6 +29,8 @@ stm32f4 = { version = "0.11.0", features = ["stm32f407", "rt"], optional = true 
 
 # HAL (Hardware Abstraction Layer), optional
 stm32f4xx-hal = { version = "0.8.3", features = ['stm32f407'], optional = true }
+
+heapless = { version = "0.5.6", optional = true }
 
 # Uncomment for the panic example.
 # panic-itm = "0.4.1"
