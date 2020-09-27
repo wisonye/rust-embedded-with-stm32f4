@@ -16,26 +16,28 @@ mod rcc_clock_settings;
 mod rcc_pll_config_register;
 
 use cortex_m_rt::entry;
+use panic_semihosting as _;
 
 #[cfg(feature = "enable-debug")]
 use cortex_m_semihosting::hprintln;
 
-use panic_semihosting as _;
-
-use crate::clock_utils::{ClockSource, RccClocks};
-
+#[cfg(feature = "enable-hal")]
 use crate::hal::{
     prelude::*,
     stm32, // The `stm32` should means `stm32f407` which enable by the `features` in `.toml`
 };
 
 // This is very important!!!
+#[cfg(feature = "enable-hal")]
 use stm32f4xx_hal as hal;
 
 // Import from `stm32f4xx_hal`
+#[cfg(feature = "enable-hal")]
 use hal::rcc::{Clocks, Rcc};
 
-#[cfg(feature = "enable-debug")]
+use crate::clock_utils::{ClockSource, RccClocks};
+
+#[cfg(feature = "enable-debug, enable-hal")]
 fn print_clocks(clocks: &Clocks) {
     fn get_megahertz_is_possible(frequency: u32) -> u32 {
         if frequency > 1_000_000 {
@@ -66,13 +68,16 @@ fn main() -> ! {
     #[cfg(feature = "enable-debug")]
     let _ = hprintln!("STM32F4 setup and print system clock demo is running >>>>>");
 
-    // let stm32407_peripherals = stm32::Peripherals::take().unwrap();
-    // let cortex_m_peripherals = cortex_m::peripheral::Peripherals::take().unwrap();
+    #[cfg(feature = "enable-hal")]
+    {
+        let stm32407_peripherals = stm32::Peripherals::take().unwrap();
+        let cortex_m_peripherals = cortex_m::peripheral::Peripherals::take().unwrap();
 
-    // Set up the system clock. We want to run at 16Mhz for this one.
-    // let constrained_rcc_peripheral: Rcc = stm32407_peripherals.RCC.constrain();
-    // let clocks: Clocks = constrained_rcc_peripheral.cfgr.sysclk(16.mhz()).freeze();
-    // let clocks: Clocks = constrained_rcc_peripheral.cfgr.use_hse(100.mhz()).freeze();
+        // Set up the system clock. We want to run at 16Mhz for this one.
+        let constrained_rcc_peripheral: Rcc = stm32407_peripherals.RCC.constrain();
+        // let clocks: Clocks = constrained_rcc_peripheral.cfgr.sysclk(16.mhz()).freeze();
+        let clocks: Clocks = constrained_rcc_peripheral.cfgr.use_hse(100.mhz()).freeze();
+    }
 
     #[cfg(feature = "enable-debug")]
     {

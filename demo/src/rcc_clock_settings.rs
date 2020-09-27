@@ -100,11 +100,11 @@ pub mod clock_source_selecting {
 
 // ------ RCC registers address -------------------------------
 pub const RCC_CR: u32 = 0x4002_3800; // page 65
-pub const RCC_AHB1RSTR: u32 = RCC_CR + 0x10; // page 233
-pub const RCC_AHB2RSTR: u32 = RCC_CR + 0x14; // page 236
-pub const RCC_AHB3RSTR: u32 = RCC_CR + 0x18; // page 237
-pub const RCC_AHB1ENR: u32 = RCC_CR + 0x30; // page 242, 243
-pub const RCC_AHB1LPENR: u32 = RCC_CR + 0x50; // Low power (sleep) mode, page 250, 252,
-pub const RCC_AHB2ENR: u32 = RCC_CR + 0x34; // page 244
-pub const RCC_AHB2LPENR: u32 = RCC_CR + 0x54; // page 252
+// pub const RCC_AHB1RSTR: u32 = RCC_CR + 0x10; // page 233
+// pub const RCC_AHB2RSTR: u32 = RCC_CR + 0x14; // page 236
+// pub const RCC_AHB3RSTR: u32 = RCC_CR + 0x18; // page 237
+// pub const RCC_AHB1ENR: u32 = RCC_CR + 0x30; // page 242, 243
+// pub const RCC_AHB1LPENR: u32 = RCC_CR + 0x50; // Low power (sleep) mode, page 250, 252,
+// pub const RCC_AHB2ENR: u32 = RCC_CR + 0x34; // page 244
+// pub const RCC_AHB2LPENR: u32 = RCC_CR + 0x54; // page 252
 

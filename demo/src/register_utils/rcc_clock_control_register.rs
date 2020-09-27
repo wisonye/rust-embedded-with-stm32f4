@@ -21,7 +21,7 @@ pub const RCC_CR_PLLI2S_IS_READY: u32 = 1 << 27;
 pub struct RccClockControlRegister {}
 
 /// Alias
-pub type RCC_CR = RccClockControlRegister;
+pub type RccCr = RccClockControlRegister;
 
 ///
 impl RccClockControlRegister {

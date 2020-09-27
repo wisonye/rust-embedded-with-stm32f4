@@ -184,27 +184,31 @@ impl RccClocks {
 
         match clock_source {
             ClockSource::HsiThroughPll => {
-                // 2. Set PLL factors MNPQ
+                // 2. Setup flash
+
+                // 3. Set PLL factors MNPQ
                 RccPllConfigurationRegister::set_pll_mnpq(false);
-                // 3. Enable PLL and wait for it stable
+                // 4. Enable PLL and wait for it stable
                 RccClockControlRegister::enable_pll_and_wait_for_it_stable();
-                // 4. Set the AHB prescaler, APB1 prescaler, APB2 prescaler
+                // 5. Set the AHB prescaler, APB1 prescaler, APB2 prescaler
                 RccClockConfigurationRegister::set_bus_prescaler(false);
             }
             ClockSource::HseThroughPll => {
                 // 1. Enable HSE and wait for it stable
                 RccClockControlRegister::enable_hse_as_clock_source_and_wait_for_it_stable();
-                // 2. Set PLL factors MNPQ
+                // 2. Setup flash
+
+                // 3. Set PLL factors MNPQ
                 RccPllConfigurationRegister::set_pll_mnpq(true);
-                // 3. Enable PLL and wait for it stable
+                // 4. Enable PLL and wait for it stable
                 RccClockControlRegister::enable_pll_and_wait_for_it_stable();
-                // 4. Set the AHB prescaler, APB1 prescaler, APB2 prescaler
+                // 5. Set the AHB prescaler, APB1 prescaler, APB2 prescaler
                 RccClockConfigurationRegister::set_bus_prescaler(true);
             }
             _ => {}
         }
 
-        // 5. Switch clock source
+        // 6. Switch clock source
         RccClockConfigurationRegister::switch_clock_source_and_wait_for_stable(
             RccSystemClockSwtich::PllSelectedAsSytemClock,
         );
