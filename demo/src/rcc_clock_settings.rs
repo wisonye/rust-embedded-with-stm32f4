@@ -51,6 +51,10 @@
 #[cfg(feature = "use-stm32f407g-disc1")]
 pub mod clock_source_selecting {
     pub const SYS_CLOCK_MAX_SPEED: u32 = 168_000_000;
+    pub const APB1_PERIPHERAL_MAX_SPEED: u32 = 42_000_000;
+    pub const APB2_PERIPHERAL_MAX_SPEED: u32 = 84_000_000;
+    pub const APB1_TIMER_FACTOR: u32 = 2;
+    pub const APB2_TIMER_FACTOR: u32 = 2;
 
     // Use HSI --> PLL as clock source and to max frequency
     pub const HSI_FREQUENCY: u32 = 16_000_000;
@@ -76,6 +80,10 @@ pub mod clock_source_selecting {
 #[cfg(feature = "use-weact-black-pill")]
 pub mod clock_source_selecting {
     pub const SYS_CLOCK_MAX_SPEED: u32 = 100_000_000;
+    pub const APB1_PERIPHERAL_MAX_SPEED: u32 = 50_000_000;
+    pub const APB2_PERIPHERAL_MAX_SPEED: u32 = 100_000_000;
+    pub const APB1_TIMER_FACTOR: u32 = 2;
+    pub const APB2_TIMER_FACTOR: u32 = 1;
 
     // Use HSI --> PLL as clock source and to max frequency
     pub const HSI_FREQUENCY: u32 = 16_000_000;

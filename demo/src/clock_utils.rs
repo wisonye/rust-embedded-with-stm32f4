@@ -40,7 +40,7 @@ pub struct RccClocks {
 /// As `heapless::String<N>` allocates fixed memory on the stack,
 /// and the maximum speed is up to "XXXMhz", that's why take 6bytes.
 #[cfg(feature = "enable-debug")]
-fn debug_clock(speed: &Option<MegaHertz>) -> String<U6> {
+fn debug_frequency(speed: &Option<MegaHertz>) -> String<U6> {
     if speed.is_some() {
         let mut temp_str: String<U6> = String::new();
         let _ = write!(temp_str, "{}MHz", speed.as_ref().unwrap().0);
@@ -55,25 +55,28 @@ fn debug_clock(speed: &Option<MegaHertz>) -> String<U6> {
 impl core::fmt::Debug for RccClocks {
     fn fmt(&self, f: &mut core::fmt::Formatter) -> core::fmt::Result {
         f.debug_struct("[ RccClocks ]:")
-            .field("hsi", &debug_clock(&self.hsi))
-            .field("hse", &debug_clock(&self.hse))
+            .field("hsi", &debug_frequency(&self.hsi))
+            .field("hse", &debug_frequency(&self.hse))
             .field("clock_source", &self.clock_source)
-            .field("system_clock", &debug_clock(&self.system_clock))
-            .field("hardware_cpu_clock", &debug_clock(&self.hardware_cpu_clock))
+            .field("system_clock", &debug_frequency(&self.system_clock))
+            .field(
+                "hardware_cpu_clock",
+                &debug_frequency(&self.hardware_cpu_clock),
+            )
             .field("pll_m", &self.pll_m)
             .field("pll_n", &self.pll_n)
             .field("pll_p", &self.pll_p)
             .field("pll_q", &self.pll_q)
             .field(
                 "apb1_peripheral_clock",
-                &debug_clock(&self.apb1_peripheral_clock),
+                &debug_frequency(&self.apb1_peripheral_clock),
             )
-            .field("apb1_timer_clock", &debug_clock(&self.apb1_timer_clock))
+            .field("apb1_timer_clock", &debug_frequency(&self.apb1_timer_clock))
             .field(
                 "apb2_peripheral_clock",
-                &debug_clock(&self.apb2_peripheral_clock),
+                &debug_frequency(&self.apb2_peripheral_clock),
             )
-            .field("apb2_timer_clock", &debug_clock(&self.apb2_timer_clock))
+            .field("apb2_timer_clock", &debug_frequency(&self.apb2_timer_clock))
             .finish()
     }
 }
@@ -95,22 +98,36 @@ impl RccClocks {
     /// Create `RccClocks` instance
     fn create_rcc_clocks(clock_source: &ClockSource) -> RccClocks {
         let rcc_clock = match clock_source {
-            ClockSource::Hsi => RccClocks {
-                hsi: Some(clock_source_selecting::HSI_FREQUENCY.into()),
-                hse: Some(clock_source_selecting::HSE_FREQUENCY.into()),
-                clock_source: (*clock_source).clone(),
-                system_clock: Some(clock_source_selecting::HSI_FREQUENCY.into()),
-                hardware_cpu_clock: Some(clock_source_selecting::HSI_FREQUENCY.into()),
-                ahb_prescaler: None,
-                pll_m: None,
-                pll_n: None,
-                pll_p: None,
-                pll_q: None,
-                apb1_peripheral_clock: None,
-                apb1_timer_clock: None,
-                apb2_peripheral_clock: None,
-                apb2_timer_clock: None,
-            },
+            ClockSource::Hsi => {
+                let system_clock_speed = clock_source_selecting::HSI_FREQUENCY;
+                let cpu_clock_speed =
+                    system_clock_speed / clock_source_selecting::AHB_PRESCALER_FOR_HSI;
+                let apb1_peripheral_clock_speed =
+                    cpu_clock_speed / clock_source_selecting::APB1_PRESCALER_FOR_HSI;
+                let apb2_peripheral_clock_speed =
+                    cpu_clock_speed / clock_source_selecting::APB2_PRESCALER_FOR_HSI;
+                let apb1_timer_clock_speed =
+                    apb1_peripheral_clock_speed * clock_source_selecting::APB1_TIMER_FACTOR;
+                let apb2_timer_clock_speed =
+                    apb2_peripheral_clock_speed * clock_source_selecting::APB2_TIMER_FACTOR;
+
+                RccClocks {
+                    hsi: Some(clock_source_selecting::HSI_FREQUENCY.into()),
+                    hse: Some(clock_source_selecting::HSE_FREQUENCY.into()),
+                    clock_source: (*clock_source).clone(),
+                    system_clock: Some(system_clock_speed.into()),
+                    hardware_cpu_clock: Some(cpu_clock_speed.into()),
+                    ahb_prescaler: None,
+                    pll_m: None,
+                    pll_n: None,
+                    pll_p: None,
+                    pll_q: None,
+                    apb1_peripheral_clock: Some(apb1_peripheral_clock_speed.into()),
+                    apb1_timer_clock: Some(apb1_timer_clock_speed.into()),
+                    apb2_peripheral_clock: Some(apb2_peripheral_clock_speed.into()),
+                    apb2_timer_clock: Some(apb2_timer_clock_speed.into()),
+                }
+            }
             ClockSource::HsiThroughPll => {
                 let system_clock_speed = clock_source_selecting::HSI_FREQUENCY
                     / clock_source_selecting::PLL_M_PRESCALER_FOR_HSI
@@ -119,6 +136,15 @@ impl RccClocks {
 
                 let cpu_clock_speed =
                     system_clock_speed / clock_source_selecting::AHB_PRESCALER_FOR_HSI;
+
+                let apb1_peripheral_clock_speed =
+                    cpu_clock_speed / clock_source_selecting::APB1_PRESCALER_FOR_HSI;
+                let apb2_peripheral_clock_speed =
+                    cpu_clock_speed / clock_source_selecting::APB2_PRESCALER_FOR_HSI;
+                let apb1_timer_clock_speed =
+                    apb1_peripheral_clock_speed * clock_source_selecting::APB1_TIMER_FACTOR;
+                let apb2_timer_clock_speed =
+                    apb2_peripheral_clock_speed * clock_source_selecting::APB2_TIMER_FACTOR;
 
                 RccClocks {
                     hsi: Some(clock_source_selecting::HSI_FREQUENCY.into()),
@@ -131,10 +157,10 @@ impl RccClocks {
                     pll_n: Some(clock_source_selecting::PLL_N_PRESCALER_FOR_HSI),
                     pll_p: Some(clock_source_selecting::PLL_P_PRESCALER_FOR_HSI),
                     pll_q: Some(clock_source_selecting::PLL_Q_PRESCALER_FOR_HSI),
-                    apb1_peripheral_clock: None,
-                    apb1_timer_clock: None,
-                    apb2_peripheral_clock: None,
-                    apb2_timer_clock: None,
+                    apb1_peripheral_clock: Some(apb1_peripheral_clock_speed.into()),
+                    apb1_timer_clock: Some(apb1_timer_clock_speed.into()),
+                    apb2_peripheral_clock: Some(apb2_peripheral_clock_speed.into()),
+                    apb2_timer_clock: Some(apb2_timer_clock_speed.into()),
                 }
             }
             ClockSource::HseThroughPll => {
@@ -145,6 +171,15 @@ impl RccClocks {
 
                 let cpu_clock_speed =
                     system_clock_speed / clock_source_selecting::AHB_PRESCALER_FOR_HSE;
+
+                let apb1_peripheral_clock_speed =
+                    cpu_clock_speed / clock_source_selecting::APB1_PRESCALER_FOR_HSE;
+                let apb2_peripheral_clock_speed =
+                    cpu_clock_speed / clock_source_selecting::APB2_PRESCALER_FOR_HSE;
+                let apb1_timer_clock_speed =
+                    apb1_peripheral_clock_speed * clock_source_selecting::APB1_TIMER_FACTOR;
+                let apb2_timer_clock_speed =
+                    apb2_peripheral_clock_speed * clock_source_selecting::APB2_TIMER_FACTOR;
 
                 RccClocks {
                     hsi: Some(clock_source_selecting::HSI_FREQUENCY.into()),
@@ -157,10 +192,10 @@ impl RccClocks {
                     pll_n: Some(clock_source_selecting::PLL_N_PRESCALER_FOR_HSE),
                     pll_p: Some(clock_source_selecting::PLL_P_PRESCALER_FOR_HSE),
                     pll_q: Some(clock_source_selecting::PLL_Q_PRESCALER_FOR_HSE),
-                    apb1_peripheral_clock: None,
-                    apb1_timer_clock: None,
-                    apb2_peripheral_clock: None,
-                    apb2_timer_clock: None,
+                    apb1_peripheral_clock: Some(apb1_peripheral_clock_speed.into()),
+                    apb1_timer_clock: Some(apb1_timer_clock_speed.into()),
+                    apb2_peripheral_clock: Some(apb2_peripheral_clock_speed.into()),
+                    apb2_timer_clock: Some(apb2_timer_clock_speed.into()),
                 }
             }
         };
