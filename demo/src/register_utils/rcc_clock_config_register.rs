@@ -201,18 +201,18 @@ impl RccClockConfigurationRegister {
         .into();
         let apb2_prescaler_bits = apb2_prescaler.to_register_bits();
 
-        #[cfg(feature = "enable-debug")]
-        {
-            let _ = hprintln!("ahb_prescaler: {:?}", ahb_prescaler);
-            let _ = hprintln!("ahb_prescaler_bits: {}", ahb_prescaler_bits);
-            let _ = hprintln!("ahb_prescaler_bits: {:#06b}", ahb_prescaler_bits);
-            let _ = hprintln!("apb1_prescaler: {:?}", apb1_prescaler);
-            let _ = hprintln!("apb1_prescaler_bits: {}", apb1_prescaler_bits);
-            let _ = hprintln!("apb1_prescaler_bits: {:#04b}", apb1_prescaler_bits);
-            let _ = hprintln!("apb2_prescaler: {:?}", apb2_prescaler);
-            let _ = hprintln!("apb2_prescaler_bits: {}", apb2_prescaler_bits);
-            let _ = hprintln!("apb2_prescaler_bits: {:#04b}", apb2_prescaler_bits);
-        }
+        // #[cfg(feature = "enable-debug")]
+        // {
+        // let _ = hprintln!("ahb_prescaler: {:?}", ahb_prescaler);
+        // let _ = hprintln!("ahb_prescaler_bits: {}", ahb_prescaler_bits);
+        // let _ = hprintln!("ahb_prescaler_bits: {:#06b}", ahb_prescaler_bits);
+        // let _ = hprintln!("apb1_prescaler: {:?}", apb1_prescaler);
+        // let _ = hprintln!("apb1_prescaler_bits: {}", apb1_prescaler_bits);
+        // let _ = hprintln!("apb1_prescaler_bits: {:#04b}", apb1_prescaler_bits);
+        // let _ = hprintln!("apb2_prescaler: {:?}", apb2_prescaler);
+        // let _ = hprintln!("apb2_prescaler_bits: {}", apb2_prescaler_bits);
+        // let _ = hprintln!("apb2_prescaler_bits: {:#04b}", apb2_prescaler_bits);
+        // }
 
         unsafe {
             ptr::write_volatile(
@@ -231,11 +231,11 @@ impl RccClockConfigurationRegister {
     ///
     pub fn switch_clock_source_and_wait_for_stable(clock_source: RccSystemClockSwtich) {
         let clock_source_bits = clock_source.to_register_bits();
-        #[cfg(feature = "enable-debug")]
-        {
-            let _ = hprintln!("clock_source: {:?}", clock_source);
-            let _ = hprintln!("clock_source_bits: {:#04b}", clock_source_bits);
-        }
+        // #[cfg(feature = "enable-debug")]
+        // {
+        // let _ = hprintln!("clock_source: {:?}", clock_source);
+        // let _ = hprintln!("clock_source_bits: {:#04b}", clock_source_bits);
+        // }
 
         let rcc_cfgr_write_ptr = RCC_CGFCR as *mut u32;
         let rcc_cfgr_read_ptr = RCC_CGFCR as *const u32;
@@ -349,15 +349,15 @@ impl RccClockConfigurationRegister {
                 clock_switch_status_value, clock_switch_status_bits
             ),
             format_args!(
-                "\nAHB prescaler: {:?}\t\t\t\t // bits: {:#04b}",
+                "\nAHB prescaler: {:?}\t\t\t\t // bits: {:#06b}",
                 ahb_prescaler_value, ahb_prescaler_bits
             ),
             format_args!(
-                "\nAPB low speed prescaler (APB1): {:?}\t\t // bits: {:#04b}",
+                "\nAPB low speed prescaler (APB1): {:?}\t\t // bits: {:#05b}",
                 apb1_low_speed_prescaler_value, apb1_low_speed_prescaler_bits
             ),
             format_args!(
-                "\nAPB high speed prescaler (APB2): {:?}\t\t // bits: {:#04b}",
+                "\nAPB high speed prescaler (APB2): {:?}\t\t // bits: {:#05b}",
                 apb2_high_speed_prescaler_value, apb2_high_speed_prescaler_bits
             ),
         );

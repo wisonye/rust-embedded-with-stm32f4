@@ -80,13 +80,13 @@ impl RccPllConfigurationRegister {
             pll_set_bits |= RCC_PLLCFGR_PLL_SRC_IS_HSE_BITS;
         }
 
-        #[cfg(feature = "enable-debug")]
-        {
-            let _ = hprintln!("pll_m: {}", pll_m);
-            let _ = hprintln!("pll_n: {}", pll_n);
-            let _ = hprintln!("pll_p: {}", pll_p);
-            let _ = hprintln!("pll_q: {}", pll_q);
-        }
+        // #[cfg(feature = "enable-debug")]
+        // {
+        // let _ = hprintln!("pll_m: {}", pll_m);
+        // let _ = hprintln!("pll_n: {}", pll_n);
+        // let _ = hprintln!("pll_p: {}", pll_p);
+        // let _ = hprintln!("pll_q: {}", pll_q);
+        // }
 
         unsafe {
             ptr::write_volatile(rcc_pllcfgr_write_ptr, pll_set_bits);
@@ -200,8 +200,10 @@ impl RccPllConfigurationRegister {
             ))
         };
 
-        let pll_source = (cfg_register_value & RCC_PLLCFGR_PLL_SRC_IS_HSE_BITS) >> RCC_PLLCFGR_PLL_SRC_IS_HSE_START_BIT;
-        let pll_source_is_hse = pll_source == RCC_PLLCFGR_PLL_SRC_IS_HSE_BITS >> RCC_PLLCFGR_PLL_SRC_IS_HSE_START_BIT;
+        let pll_source = (cfg_register_value & RCC_PLLCFGR_PLL_SRC_IS_HSE_BITS)
+            >> RCC_PLLCFGR_PLL_SRC_IS_HSE_START_BIT;
+        let pll_source_is_hse =
+            pll_source == RCC_PLLCFGR_PLL_SRC_IS_HSE_BITS >> RCC_PLLCFGR_PLL_SRC_IS_HSE_START_BIT;
         let pll_source_desc = if pll_source_is_hse { "HSE" } else { "HSI" };
 
         let printing_header = "\n[ RCC PLL configuration register (RCC_PLLCFGR) ]: \n";
@@ -209,11 +211,26 @@ impl RccPllConfigurationRegister {
             "{}{}{}{}{}{}{}",
             printing_header,
             format_args!("RCC_PLLCFGR value: {:#034b}", cfg_register_value),
-            format_args!("\nMain PLL M: {:?},\t// bits: {:#08b}", pll_m_value, temp_m_value),
-            format_args!("\nMain PLL N: {:?},\t// bits: {:#011b}", pll_n_value, temp_n_value),
-            format_args!("\nMain PLL P: {:?},\t// bits: {:#04b}", pll_p_value, temp_p_value),
-            format_args!("\nMain PLL q: {:?},\t// bits: {:#06b}", pll_q_value, temp_q_value),
-            format_args!("\nMain PLL source: {:?},\t// bits: {:#02b}", pll_source_desc, pll_source)
+            format_args!(
+                "\nMain PLL M: {:?},\t// bits: {:#08b}",
+                pll_m_value, temp_m_value
+            ),
+            format_args!(
+                "\nMain PLL N: {:?},\t// bits: {:#011b}",
+                pll_n_value, temp_n_value
+            ),
+            format_args!(
+                "\nMain PLL P: {:?},\t// bits: {:#04b}",
+                pll_p_value, temp_p_value
+            ),
+            format_args!(
+                "\nMain PLL q: {:?},\t// bits: {:#06b}",
+                pll_q_value, temp_q_value
+            ),
+            format_args!(
+                "\nMain PLL source: {:?},\t// bits: {:#02b}",
+                pll_source_desc, pll_source
+            )
         );
     }
 }
