@@ -16,6 +16,7 @@
 - [Write the first example](./how-to-choose-which-crate-to-start/index.md)
     - [The basic example](./how-to-choose-which-crate-to-start/the-basic-example.md)
     - [The GPIO LED blinking example](./how-to-choose-which-crate-to-start/the-gpio-led-example.md)
+    - [How to quit cargo run qemu](./how-to-choose-which-crate-to-start/how-to-quit-cargo-run-qemu.md)
 - [Something you need to know](./something-you-need-to-know-before-we-dive-deep/index.md)
     - [About STM32F4 MCU registers](./something-you-need-to-know-before-we-dive-deep/mcu-register.md)
     - [STM32F4 **GPIOP** registers](./something-you-need-to-know-before-we-dive-deep/mcu-gpio-register.md)
