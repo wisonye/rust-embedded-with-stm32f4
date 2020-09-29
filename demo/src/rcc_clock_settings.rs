@@ -55,6 +55,7 @@ pub mod clock_source_selecting {
     pub const APB2_PERIPHERAL_MAX_SPEED: u32 = 84_000_000;
     pub const APB1_TIMER_FACTOR: u32 = 2;
     pub const APB2_TIMER_FACTOR: u32 = 2;
+    pub const FLASH_LATENCY: u32 = 5;
 
     // Use HSI --> PLL as clock source and to max frequency
     pub const HSI_FREQUENCY: u32 = 16_000_000;
@@ -84,6 +85,7 @@ pub mod clock_source_selecting {
     pub const APB2_PERIPHERAL_MAX_SPEED: u32 = 100_000_000;
     pub const APB1_TIMER_FACTOR: u32 = 2;
     pub const APB2_TIMER_FACTOR: u32 = 1;
+    pub const FLASH_LATENCY: u32 = 3;
 
     // Use HSI --> PLL as clock source and to max frequency
     pub const HSI_FREQUENCY: u32 = 16_000_000;

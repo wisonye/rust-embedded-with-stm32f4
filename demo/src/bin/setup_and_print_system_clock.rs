@@ -14,6 +14,8 @@ mod rcc_clock_control_register;
 mod rcc_clock_settings;
 #[path = "../register_utils/rcc_pll_config_register.rs"]
 mod rcc_pll_config_register;
+#[path = "../register_utils/flash_access_control_register.rs"]
+mod flash_access_control_register;
 
 use cortex_m_rt::entry;
 use panic_semihosting as _;
