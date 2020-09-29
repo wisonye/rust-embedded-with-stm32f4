@@ -1,4 +1,5 @@
 use crate::clock_frequency::MegaHertz;
+use crate::flash_access_control_register::FlashAccessControlRegister;
 use crate::rcc_clock_config_register::{RccClockConfigurationRegister, RccSystemClockSwtich};
 use crate::rcc_clock_control_register::RccClockControlRegister;
 use crate::rcc_clock_settings::clock_source_selecting;
@@ -67,6 +68,7 @@ impl core::fmt::Debug for RccClocks {
             .field("pll_n", &self.pll_n)
             .field("pll_p", &self.pll_p)
             .field("pll_q", &self.pll_q)
+            .field("ahb_prescaler", &self.ahb_prescaler)
             .field(
                 "apb1_peripheral_clock",
                 &debug_frequency(&self.apb1_peripheral_clock),
@@ -88,6 +90,7 @@ impl RccClocks {
         RccClockControlRegister::print_config();
         RccClockConfigurationRegister::print_config();
         RccPllConfigurationRegister::print_config();
+        FlashAccessControlRegister::print_config();
     }
 
     /// Reset all rcc registers
@@ -220,7 +223,9 @@ impl RccClocks {
         match clock_source {
             ClockSource::HsiThroughPll => {
                 // 2. Setup flash
-
+                FlashAccessControlRegister::set_flash_latency(
+                    clock_source_selecting::FLASH_LATENCY,
+                );
                 // 3. Set PLL factors MNPQ
                 RccPllConfigurationRegister::set_pll_mnpq(false);
                 // 4. Enable PLL and wait for it stable
@@ -232,7 +237,9 @@ impl RccClocks {
                 // 1. Enable HSE and wait for it stable
                 RccClockControlRegister::enable_hse_as_clock_source_and_wait_for_it_stable();
                 // 2. Setup flash
-
+                FlashAccessControlRegister::set_flash_latency(
+                    clock_source_selecting::FLASH_LATENCY,
+                );
                 // 3. Set PLL factors MNPQ
                 RccPllConfigurationRegister::set_pll_mnpq(true);
                 // 4. Enable PLL and wait for it stable

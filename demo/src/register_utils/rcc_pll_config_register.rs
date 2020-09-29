@@ -202,8 +202,7 @@ impl RccPllConfigurationRegister {
 
         let pll_source = (cfg_register_value & RCC_PLLCFGR_PLL_SRC_IS_HSE_BITS)
             >> RCC_PLLCFGR_PLL_SRC_IS_HSE_START_BIT;
-        let pll_source_is_hse =
-            pll_source == RCC_PLLCFGR_PLL_SRC_IS_HSE_BITS >> RCC_PLLCFGR_PLL_SRC_IS_HSE_START_BIT;
+        let pll_source_is_hse = pll_source == 1;
         let pll_source_desc = if pll_source_is_hse { "HSE" } else { "HSI" };
 
         let printing_header = "\n[ RCC PLL configuration register (RCC_PLLCFGR) ]: \n";
