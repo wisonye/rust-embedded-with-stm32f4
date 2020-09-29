@@ -4,11 +4,11 @@
 
 ![flash_read_latency.png](../../images/flash_read_latency.png)
 
-First thing first, we need to know what _Why we have to set this flash prefetch latency_?
+First thing first, we need to know _Why we have to set this flash prefetch latency_?
 
 The explanation above is the answer: _**There is a special relation between CPU clock frequency and Flash memory read time**_.
 
-And we have to make it right after we change the **`HCLK`** frequency!!!
+Then we have to make it right after we change the **`HCLK`** frequency!!!
 
 </br>
 

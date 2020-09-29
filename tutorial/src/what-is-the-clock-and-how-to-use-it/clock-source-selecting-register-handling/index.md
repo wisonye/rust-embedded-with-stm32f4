@@ -15,9 +15,9 @@ We need to go through all the steps below for picking a clock source target to t
 
 For each step, we need to deal with different register, we will walk through them one by one later.
 
-Before that, let's define some `enum` types and `struct` to describe our `clock`:
+Before that, let's define some `enum` types and `struct` to describe the `clock`:
 
-- The clock source type we will in the demo:
+- The clock source type we will use in the demo:
 
     ```rust
     #[derive(Debug, Clone, PartialEq)]
@@ -28,7 +28,7 @@ Before that, let's define some `enum` types and `struct` to describe our `clock`
     }
     ```
 
-- The clock data structure which includes all related information in the `clock tree diagram`, and we only focus on the setting value and the final working frequency output:
+- The clock data structure which includes all related information in the `clock tree diagram`, and we only focus on related settings and the final working frequency output:
 
     ```rust
     pub struct RccClocks {
@@ -60,8 +60,7 @@ Before that, let's define some `enum` types and `struct` to describe our `clock`
     }
     ```
 
-    As you can see, we use a `MegaHertz` frequency unit type above, 
-    it allows us easier to convert a number (`u32`) into frequency unit (`Hz, KHz, MHz`), here is the source code:
+    As you can see, the `MegaHertz` frequency unit type above allows easier to convert a number (`u32`) into frequency unit (`Hz, KHz, MHz`), here is the source code:
 
     ```rust
     #[derive(PartialEq, PartialOrd, Clone, Copy)]

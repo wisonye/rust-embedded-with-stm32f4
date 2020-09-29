@@ -10,9 +10,9 @@ What information we got from this diagram?
 
     ![rcc-cfgr-clock-switch.png](../../images/rcc-cfgr-clock-switch.png)
 
-- `bit2 ~ bit3` represents whether the switched clock stable or not.
+- `bit2 ~ bit3` represents whether the switched clock is stable or not.
 
-- `bit4 ~ bit7` controls the `AHB bus prescaler` which uses to be calculated the **`HCLK`** by **`SYSCLK`** frequency.
+- `bit4 ~ bit7` controls the `AHB bus prescaler` which uses to calculate the **`HCLK`** by **`SYSCLK`** frequency.
 
 - `bit10 ~ bit12` controls the `APB low speed prescaler (APB1)`.
 
