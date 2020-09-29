@@ -22,19 +22,30 @@ pub enum ClockSource {
 
 ///
 pub struct RccClocks {
+    // HSI fixed frequency
     hsi: Option<MegaHertz>,
+    // Onboard HSE fixed frequency
     hse: Option<MegaHertz>,
+    // The clock source we picked
     clock_source: ClockSource,
+    // SYSCLK calculated frequency
     system_clock: Option<MegaHertz>,
+    // HCLK calculated frequency
     hardware_cpu_clock: Option<MegaHertz>,
+    // AHB bus prescaler
     ahb_prescaler: Option<u32>,
+    // PLL factors
     pll_m: Option<u32>,
     pll_n: Option<u32>,
     pll_p: Option<u32>,
     pll_q: Option<u32>,
+    // APB1 periheral calculated frequency
     apb1_peripheral_clock: Option<MegaHertz>,
+    // APB1 timer calculated frequency
     apb1_timer_clock: Option<MegaHertz>,
+    // APB2 periheral calculated frequency
     apb2_peripheral_clock: Option<MegaHertz>,
+    // APB2 timer calculated frequency
     apb2_timer_clock: Option<MegaHertz>,
 }
 
@@ -222,30 +233,30 @@ impl RccClocks {
 
         match clock_source {
             ClockSource::HsiThroughPll => {
-                // 2. Setup flash
+                // 2. Set the AHB prescaler, APB1 prescaler, APB2 prescaler
+                RccClockConfigurationRegister::set_bus_prescaler(false);
+                // 3. Setup flash
                 FlashAccessControlRegister::set_flash_latency(
                     clock_source_selecting::FLASH_LATENCY,
                 );
-                // 3. Set PLL factors MNPQ
+                // 4. Set PLL factors MNPQ
                 RccPllConfigurationRegister::set_pll_mnpq(false);
-                // 4. Enable PLL and wait for it stable
+                // 5. Enable PLL and wait for it stable
                 RccClockControlRegister::enable_pll_and_wait_for_it_stable();
-                // 5. Set the AHB prescaler, APB1 prescaler, APB2 prescaler
-                RccClockConfigurationRegister::set_bus_prescaler(false);
             }
             ClockSource::HseThroughPll => {
                 // 1. Enable HSE and wait for it stable
                 RccClockControlRegister::enable_hse_as_clock_source_and_wait_for_it_stable();
-                // 2. Setup flash
+                // 2. Set the AHB prescaler, APB1 prescaler, APB2 prescaler
+                RccClockConfigurationRegister::set_bus_prescaler(true);
+                // 3. Setup flash
                 FlashAccessControlRegister::set_flash_latency(
                     clock_source_selecting::FLASH_LATENCY,
                 );
-                // 3. Set PLL factors MNPQ
+                // 4. Set PLL factors MNPQ
                 RccPllConfigurationRegister::set_pll_mnpq(true);
-                // 4. Enable PLL and wait for it stable
+                // 5. Enable PLL and wait for it stable
                 RccClockControlRegister::enable_pll_and_wait_for_it_stable();
-                // 5. Set the AHB prescaler, APB1 prescaler, APB2 prescaler
-                RccClockConfigurationRegister::set_bus_prescaler(true);
             }
             _ => {}
         }
