@@ -40,4 +40,4 @@
         - [RCC_CFGR](./what-is-the-clock-and-how-to-use-it/clock-source-selecting-register-handling/rcc_cfgr.md)
         - [FLASH_ACR](./what-is-the-clock-and-how-to-use-it/clock-source-selecting-register-handling/flash_acr.md)
         - [RCC_PLLCFGR](./what-is-the-clock-and-how-to-use-it/clock-source-selecting-register-handling/rcc_pll_cfgr.md)
-    - [System clock settings demo](./what-is-the-clock-and-how-to-use-it/system-clock-setting-demo.md)
+    - [System clock demo](./what-is-the-clock-and-how-to-use-it/system-clock-setting-demo.md)
