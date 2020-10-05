@@ -32,13 +32,12 @@ fn main() -> ! {
     #[cfg(feature = "enable-debug")]
     let _ = hprintln!("STM32F4 setup and print system clock demo is running >>>>>");
 
+    // RccClocks::setup_system_clock(ClockSource::Hsi);
+    // RccClocks::setup_system_clock(ClockSource::HsiThroughPll);
+    RccClocks::setup_system_clock(ClockSource::HseThroughPll);
+
     #[cfg(feature = "enable-debug")]
     {
-        // print_clocks(&clocks);
-        // RccClocks::setup_system_clock(ClockSource::Hsi);
-        // RccClocks::setup_system_clock(ClockSource::HsiThroughPll);
-        RccClocks::setup_system_clock(ClockSource::HseThroughPll);
-        //
         RccClocks::print_system_clock_info();
     }
 

@@ -227,7 +227,7 @@ impl RccPllConfigurationRegister {
                 pll_q_value, temp_q_value
             ),
             format_args!(
-                "\nMain PLL source: {:?},\t// bits: {:#02b}",
+                "\nMain PLL source: {:?},\t// bits: {:#03b}",
                 pll_source_desc, pll_source
             )
         );

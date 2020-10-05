@@ -268,4 +268,12 @@ impl RccClocks {
 
         rcc_clock
     }
+
+    ///
+    pub fn get_cpu_clock_frequency_in_hertz(&self) -> u32 {
+        match self.hardware_cpu_clock {
+            Some(value) => value.0 * 1_000_000,
+            None => 0,
+        }
+    }
 }
