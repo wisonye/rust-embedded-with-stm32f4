@@ -101,7 +101,7 @@
 - How to run
 
     - Use `use-stm32f407g-disc1` feature:
-        ```rust
+        ```bash
         // cd demo
         cargo watch -c --exec 'run --bin setup_and_print_system_clock --features "enable-debug use-stm32f407g-disc1"'
         ```
@@ -183,7 +183,7 @@
 
     - Use `use-weact-black-pill` feature:
 
-        ```rust
+        ```bash
         // cd demo
         cargo watch -c --exec 'run --bin setup_and_print_system_clock --features "enable-debug use-weact-black-pill"'
         ```
