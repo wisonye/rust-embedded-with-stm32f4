@@ -43,3 +43,4 @@
 - [Interrupts](./interrupts/index.md)
     - [How interrupt work](./interrupts/how-exception-works.md)
     - [`SysTick` exception handler](./interrupts/system-tick-exeption-handler.md)
+    - [The secret to call `SysTick`](./interrupts/secret_to_call_system_tick_exception.md)

@@ -28,13 +28,13 @@ That's in the [stm32-cortexm4-mcus-and-mpus-programming-manual.pdf](https://gith
 
     - The `bit16` in `STK_CTRL` will auto flip to `1` which represents finish a one-trip countdown from 
     `Reload Value` to `0.` This bit will be reset to `0` after reading from `STK_CTRL` to make sure
-    non-repeatable event will happen.
+    the even only happens once.
 
     - One `SysTick` event will be generated and the `SysTick` exception handler gets called (if defined that function).
 
 </br>
 
-For generating the `SysTick` (event) per millisecond, below are the steps
+For generating the `SysTick` (event) per millisecond, here are the steps:
 
 1. Calculate the total system ticks amount for 1 millisecond, then set that value to `STK_LOAD` register:
 
@@ -45,12 +45,12 @@ For generating the `SysTick` (event) per millisecond, below are the steps
     Because the `STK_LOAD` register only got 24 bit to save the current countdown value which means you can't set it too big,
     as that will cause overflow.
 
-2. Set the correct clock source to `STK_CTRL` register `bit2` and set `1` to `bit1` if you want to generate the `SysTick` exception:
+2. Set the correct clock source to `STK_CTRL` register `bit2` and set `bit1` to `1` if you want to generate the `SysTick` exception:
 
 
     ![stk-ctrl.png](../images/interrupts/stk-ctrl.png)
 
-3. Reset the `STK_VAL` value to `0`.
+3. Reset the `STK_VAL` register value to `0`.
 
     ![stk-val.png](../images/interrupts/stk-val.png)
 

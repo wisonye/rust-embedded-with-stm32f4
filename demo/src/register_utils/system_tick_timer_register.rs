@@ -1,6 +1,5 @@
 use crate::rcc_clock_settings::{clock_source_selecting, RCC_CR};
 use core::ptr;
-use cortex_m::asm;
 
 #[cfg(feature = "enable-debug")]
 use cortex_m_semihosting::hprintln;
