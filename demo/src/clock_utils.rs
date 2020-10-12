@@ -4,6 +4,8 @@ use crate::rcc_clock_config_register::{RccClockConfigurationRegister, RccSystemC
 use crate::rcc_clock_control_register::RccClockControlRegister;
 use crate::rcc_clock_settings::clock_source_selecting;
 use crate::rcc_pll_config_register::RccPllConfigurationRegister;
+
+#[cfg(feature = "enable-debug")]
 use core::fmt::Write;
 
 #[cfg(feature = "enable-debug")]

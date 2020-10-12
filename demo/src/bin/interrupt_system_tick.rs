@@ -16,8 +16,6 @@ mod rcc_clock_control_register;
 mod rcc_clock_settings;
 #[path = "../register_utils/rcc_pll_config_register.rs"]
 mod rcc_pll_config_register;
-#[path = "../interrupt_utils/system_tick.rs"]
-mod system_tick;
 #[path = "../register_utils/system_tick_timer_register.rs"]
 mod system_tick_timer_register;
 
@@ -28,7 +26,6 @@ use panic_semihosting as _;
 use cortex_m_semihosting::hprintln;
 
 use crate::clock_utils::{ClockSource, RccClocks};
-use system_tick::SystemTickInterrput;
 use system_tick_timer_register::SystemTickTimer;
 
 #[entry]

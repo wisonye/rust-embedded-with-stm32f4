@@ -43,8 +43,8 @@ pub fn exception(args: TokenStream, input: TokenStream) -> TokenStream {
 }
 ```
 Briefly, a procedure macro will take the source you wrote as the **input**, then do something smart in the implementation, 
-for example, implement some `trait` for your `struct`, etc. Then the macro generates back the final source code which will 
-pipe into the compiler, that's how procedure macro works. 
+for example, implement some `trait` for your `struct`, etc. Then the macro generates back the final source code as the 
+**output** which will pipe into the compiler, that's how procedure macro works. 
 
 Let's walk through the steps below before we can run `cargo expand`:
 
